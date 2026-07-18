@@ -1,6 +1,7 @@
 export { AnalyzeTab } from './AnalyzeTab'
 export { DashboardTab } from './DashboardTab'
 export { HistoryTab } from './HistoryTab'
+export { RankingTab } from './RankingTab'
 export { ConfigPanel } from './ConfigPanel'
 export { PostResultCard } from './PostResultCard'
 export { TotalsSummary, PostsBarChart, EngagementDoughnut } from './Charts'

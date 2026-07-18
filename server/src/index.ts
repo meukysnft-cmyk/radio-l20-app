@@ -16,6 +16,10 @@ function fail(error: string) {
   return { ok: false, error }
 }
 
+app.get('/', (_req, res) => {
+  res.json(ok({ service: 'Radio L20 Word of Life API', version: '1.0.0' }))
+})
+
 app.get('/api/health', (_req, res) => {
   res.json(ok({ status: 'ok', uptime: process.uptime() }))
 })
@@ -54,6 +58,40 @@ app.post('/api/analyze', async (req, res) => {
     const message = err instanceof Error ? err.message : 'Erro ao analisar post'
     res.status(500).json(fail(message))
   }
+})
+
+app.post('/api/analyze/batch', async (req, res) => {
+  const { urls } = req.body
+
+  if (!Array.isArray(urls) || urls.length === 0) {
+    res.status(400).json(fail('Lista de URLs é obrigatória'))
+    return
+  }
+
+  if (urls.length > 30) {
+    res.status(400).json(fail('Máximo de 30 URLs por vez'))
+    return
+  }
+
+  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN || null
+  const igAccountId = process.env.INSTAGRAM_ACCOUNT_ID || null
+
+  const results: Array<{ url: string; post?: unknown; error?: string }> = []
+
+  for (const url of urls) {
+    if (typeof url !== 'string' || !url.includes('instagram.com')) {
+      results.push({ url: url || '', error: 'URL inválida' })
+      continue
+    }
+    try {
+      const post = await analyzePost(url, accessToken, igAccountId)
+      results.push({ url, post })
+    } catch (err) {
+      results.push({ url, error: err instanceof Error ? err.message : 'Erro ao analisar' })
+    }
+  }
+
+  res.json(ok(results))
 })
 
 app.get('/api/posts', async (_req, res) => {

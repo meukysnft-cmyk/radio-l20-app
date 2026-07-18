@@ -1,4 +1,4 @@
-import type { WordOfLifePost } from '../types/wordOfLife'
+import type { BatchItemResult, WordOfLifePost } from '../types/wordOfLife'
 
 const API_BASE = import.meta.env.VITE_WORDOFLIFE_API_URL || ''
 
@@ -27,6 +27,13 @@ export async function analyzePost(url: string): Promise<WordOfLifePost> {
   return request<WordOfLifePost>('/api/analyze', {
     method: 'POST',
     body: JSON.stringify({ url }),
+  })
+}
+
+export async function analyzeBatch(urls: string[]): Promise<BatchItemResult[]> {
+  return request<BatchItemResult[]>('/api/analyze/batch', {
+    method: 'POST',
+    body: JSON.stringify({ urls }),
   })
 }
 

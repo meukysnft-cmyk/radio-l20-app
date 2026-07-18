@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { AnalyzeTab } from '../../components/wordoflife/AnalyzeTab'
 import { DashboardTab } from '../../components/wordoflife/DashboardTab'
+import { RankingTab } from '../../components/wordoflife/RankingTab'
 import { HistoryTab } from '../../components/wordoflife/HistoryTab'
 import { ConfigPanel } from '../../components/wordoflife/ConfigPanel'
 
-type Tab = 'analyze' | 'dashboard' | 'history' | 'config'
+type Tab = 'analyze' | 'ranking' | 'dashboard' | 'history' | 'config'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'analyze', label: 'Analisar' },
+  { key: 'ranking', label: 'Ranking' },
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'history', label: 'Histórico' },
   { key: 'config', label: 'Config' },
@@ -42,6 +44,7 @@ export function AdminWordOfLifePage() {
 
       <div className="wol-panel" role="tabpanel">
         {activeTab === 'analyze' && <AnalyzeTab />}
+        {activeTab === 'ranking' && <RankingTab />}
         {activeTab === 'dashboard' && <DashboardTab />}
         {activeTab === 'history' && <HistoryTab />}
         {activeTab === 'config' && <ConfigPanel />}
