@@ -57,3 +57,7 @@ export async function fetchConfig(): Promise<{
 export async function healthCheck(): Promise<{ status: string; uptime: number }> {
   return request('/api/health')
 }
+
+export async function deletePost(postId: string): Promise<void> {
+  return request(`/api/posts/${postId}`, { method: 'DELETE' })
+}

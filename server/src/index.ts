@@ -98,6 +98,15 @@ app.get('/api/posts', async (_req, res) => {
   res.json(ok([]))
 })
 
+app.delete('/api/posts/:id', async (req, res) => {
+  const { id } = req.params
+  if (!id) {
+    res.status(400).json(fail('ID é obrigatório'))
+    return
+  }
+  res.json(ok({ deleted: id }))
+})
+
 app.listen(PORT, () => {
   const parts: string[] = []
   if (process.env.INSTAGRAM_ACCESS_TOKEN) parts.push('Graph API ativa')

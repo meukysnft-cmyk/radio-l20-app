@@ -35,6 +35,7 @@ const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ de
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 const AppLoginPage = lazy(() => import('./pages/AppLoginPage').then((m) => ({ default: m.AppLoginPage })))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
+const WordOfLifeRankingPage = lazy(() => import('./pages/WordOfLifeRankingPage').then((m) => ({ default: m.WordOfLifeRankingPage })))
 
 /* CMS admin pages */
 const AdminDashboard = lazy(() => import('./pages/admin/cms/AdminDashboard').then((m) => ({ default: m.AdminDashboard })))
@@ -90,6 +91,7 @@ function App() {
                     <Route path={radioRoutes.videos} element={<VideosPage />} />
                     <Route path={radioRoutes.horoscope} element={<HoroscopePage />} />
                     <Route path={radioRoutes.wordOfLife} element={<WordOfLifePage />} />
+                    <Route path="/palavra-de-vida/ranking" element={<WordOfLifeRankingPage />} />
                     <Route path={radioRoutes.jobs} element={<JobsPage />} />
                     <Route path={radioRoutes.contact} element={<ContactPage />} />
                   </Route>

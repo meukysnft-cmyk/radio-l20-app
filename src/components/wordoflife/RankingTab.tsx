@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useWordOfLifePostsRealtime } from '../../hooks/useWordOfLifePosts'
+import { useDeletePost } from '../../hooks/useDeletePost'
+import type { FirestoreRecord } from '../../services/firestoreService'
 import type { WordOfLifePost } from '../../types/wordOfLife'
 
 function formatNumber(n: number): string {
@@ -8,60 +10,96 @@ function formatNumber(n: number): string {
   return String(n)
 }
 
-function computeScore(post: WordOfLifePost): number {
-  const m = post.metrics
-  const totalEngagement = m.likes + m.comments + m.shares + m.saves
-  const engagementWeight = m.engagementRate * 40
-  const volumeWeight = Math.min(totalEngagement / 100, 30)
-  const viewsWeight = Math.min(m.views / 1000, 30)
-  return Math.round((engagementWeight + volumeWeight + viewsWeight) * 10) / 10
+function buildWhatsAppText(posts: FirestoreRecord<WordOfLifePost>[]): string {
+  const medals = ['🥇', '🥈', '🥉']
+  const lines = posts
+    .sort((a, b) => b.metrics.views - a.metrics.views)
+    .slice(0, 10)
+    .map((p, i) => {
+      const medal = i < 3 ? `${medals[i]} ` : `${i + 1}º `
+      return `${medal}#${p.shortcode}\n   👁️ ${formatNumber(p.metrics.views)} views · ❤️ ${formatNumber(p.metrics.likes)} curtidas · 💬 ${formatNumber(p.metrics.comments)} coment.`
+    })
+
+  return `📊 *Ranking Palavra de Vida*\n\n${lines.join('\n\n')}\n\n🔗 Acesse: ${window.location.origin}/palavra-de-vida`
 }
 
-type SortKey = 'score' | 'engagementRate' | 'likes' | 'comments' | 'views'
+type SortKey = 'views' | 'likes' | 'comments' | 'engagementRate'
 
 export function RankingTab() {
   const { posts, loading, error } = useWordOfLifePostsRealtime(100)
-  const [sortBy, setSortBy] = useState<SortKey>('score')
+  const [sortBy, setSortBy] = useState<SortKey>('views')
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const { remove } = useDeletePost()
 
   const ranked = useMemo(() => {
-    const scored = posts.map((p) => ({
-      ...p,
-      score: computeScore(p),
-    }))
-
-    scored.sort((a, b) => {
-      if (sortBy === 'score') return b.score - a.score
-      return (b.metrics as Record<string | number, number>)[sortBy] - (a.metrics as Record<string | number, number>)[sortBy]
+    const sorted = [...posts].sort((a: FirestoreRecord<WordOfLifePost>, b: FirestoreRecord<WordOfLifePost>) => {
+      const va = (a.metrics as Record<string, number>)[sortBy] || 0
+      const vb = (b.metrics as Record<string, number>)[sortBy] || 0
+      return vb - va
     })
-
-    return scored.map((p, i) => ({ ...p, rank: i + 1 }))
+    return sorted.map((p, i) => ({ ...p, rank: i + 1 }))
   }, [posts, sortBy])
 
-  const top3 = ranked.slice(0, 3)
-  const rest = ranked.slice(3)
+  const medals = ['🥇', '🥈', '🥉']
+
+  function handleDelete(docId: string) {
+    if (confirmDelete === docId) {
+      remove(docId)
+      setConfirmDelete(null)
+    } else {
+      setConfirmDelete(docId)
+      setTimeout(() => setConfirmDelete(null), 3000)
+    }
+  }
+
+  function handleShareWhatsApp() {
+    const text = buildWhatsAppText(posts)
+    const encoded = encodeURIComponent(text)
+    window.open(`https://wa.me/?text=${encoded}`, '_blank')
+  }
+
+  function handleCopyWhatsApp() {
+    const text = buildWhatsAppText(posts)
+    navigator.clipboard.writeText(text).catch(() => {})
+  }
+
+  function handleRefresh() {
+    window.location.reload()
+  }
 
   return (
     <div className="wol-tab-content">
       <div className="wol-ranking-header">
-        <h3>Ranking de Posts</h3>
-        <div className="wol-sort-buttons">
-          {([
-            { key: 'score' as SortKey, label: 'Pontuação' },
-            { key: 'engagementRate' as SortKey, label: 'Engajamento' },
-            { key: 'likes' as SortKey, label: 'Curtidas' },
-            { key: 'comments' as SortKey, label: 'Comentários' },
-            { key: 'views' as SortKey, label: 'Views' },
-          ]).map((opt) => (
-            <button
-              key={opt.key}
-              type="button"
-              className={`wol-sort-btn${sortBy === opt.key ? ' is-active' : ''}`}
-              onClick={() => setSortBy(opt.key)}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <h3>Ranking de Reels</h3>
+        <div className="wol-ranking-actions">
+          <button type="button" className="wol-action-btn wol-refresh-btn" onClick={handleRefresh}>
+            Atualizar dados
+          </button>
+          <button type="button" className="wol-action-btn wol-share-btn" onClick={handleShareWhatsApp}>
+            Compartilhar WhatsApp
+          </button>
+          <button type="button" className="wol-action-btn wol-copy-btn" onClick={handleCopyWhatsApp}>
+            Copiar texto
+          </button>
         </div>
+      </div>
+
+      <div className="wol-sort-buttons">
+        {([
+          { key: 'views' as SortKey, label: 'Views' },
+          { key: 'likes' as SortKey, label: 'Curtidas' },
+          { key: 'comments' as SortKey, label: 'Comentários' },
+          { key: 'engagementRate' as SortKey, label: 'Engajamento' },
+        ]).map((opt) => (
+          <button
+            key={opt.key}
+            type="button"
+            className={`wol-sort-btn${sortBy === opt.key ? ' is-active' : ''}`}
+            onClick={() => setSortBy(opt.key)}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       {loading && <p className="wol-loading">Carregando ranking...</p>}
@@ -74,68 +112,59 @@ export function RankingTab() {
         </div>
       )}
 
-      {top3.length > 0 && (
-        <div className="wol-podium">
-          {top3.map((post) => (
+      {ranked.length > 0 && (
+        <div className="wol-ranking-list">
+          {ranked.map((post) => (
             <div
               key={post.id || post.shortcode}
-              className={`wol-podium-item wol-podium-${post.rank}`}
+              className={`wol-ranking-row${post.rank <= 3 ? ` wol-ranking-top${post.rank}` : ''}`}
             >
-              <span className="wol-podium-medal">
-                {post.rank === 1 ? '🥇' : post.rank === 2 ? '🥈' : '🥉'}
+              <span className="wol-ranking-pos">
+                {post.rank <= 3 ? medals[post.rank - 1] : `#${post.rank}`}
               </span>
-              {post.imageUrl && (
-                <img className="wol-podium-thumb" src={post.imageUrl} alt="" loading="lazy" />
-              )}
-              <div className="wol-podium-info">
-                <span className="wol-podium-shortcode">#{post.shortcode}</span>
-                <p className="wol-podium-caption">{post.caption?.slice(0, 80) || 'Sem legenda'}</p>
-                <div className="wol-podium-metrics">
-                  <span>{formatNumber(post.metrics.likes)} curtidas</span>
-                  <span>{formatNumber(post.metrics.comments)} coment.</span>
-                  <span>{post.metrics.engagementRate.toFixed(1)}% engajamento</span>
-                </div>
-                <span className="wol-podium-score">{post.score} pts</span>
-              </div>
-              <a
-                className="wol-podium-link"
-                href={post.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Ver
-              </a>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {rest.length > 0 && (
-        <div className="wol-ranking-list">
-          {rest.map((post) => (
-            <div key={post.id || post.shortcode} className="wol-ranking-row">
-              <span className="wol-ranking-pos">#{post.rank}</span>
               {post.imageUrl && (
                 <img className="wol-ranking-thumb" src={post.imageUrl} alt="" loading="lazy" />
               )}
               <div className="wol-ranking-info">
                 <span className="wol-ranking-shortcode">#{post.shortcode}</span>
-                <p className="wol-ranking-caption">{post.caption?.slice(0, 60) || 'Sem legenda'}</p>
+                <p className="wol-ranking-caption">{post.caption?.slice(0, 80) || 'Sem legenda'}</p>
               </div>
               <div className="wol-ranking-stats">
-                <span>{formatNumber(post.metrics.likes)} ❤️</span>
-                <span>{formatNumber(post.metrics.comments)} 💬</span>
-                <span>{post.metrics.engagementRate.toFixed(1)}%</span>
+                <span className="wol-stat">
+                  <span className="wol-stat-icon">👁️</span>
+                  <span className="wol-stat-value">{formatNumber(post.metrics.views)}</span>
+                  <span className="wol-stat-label">views</span>
+                </span>
+                <span className="wol-stat">
+                  <span className="wol-stat-icon">❤️</span>
+                  <span className="wol-stat-value">{formatNumber(post.metrics.likes)}</span>
+                  <span className="wol-stat-label">curtidas</span>
+                </span>
+                <span className="wol-stat">
+                  <span className="wol-stat-icon">💬</span>
+                  <span className="wol-stat-value">{formatNumber(post.metrics.comments)}</span>
+                  <span className="wol-stat-label">coment.</span>
+                </span>
               </div>
-              <span className="wol-ranking-score">{post.score} pts</span>
-              <a
-                className="wol-ranking-link"
-                href={post.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                →
-              </a>
+              <div className="wol-ranking-actions-row">
+                <a
+                  className="wol-ranking-link"
+                  href={post.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ver
+                </a>
+                {post.id && (
+                  <button
+                    type="button"
+                    className={`wol-delete-btn${confirmDelete === post.id ? ' is-confirm' : ''}`}
+                    onClick={() => handleDelete(post.id)}
+                  >
+                    {confirmDelete === post.id ? 'Confirmar' : 'Excluir'}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
