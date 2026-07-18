@@ -1,0 +1,140 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function adminDocPath() {
+      return /databases/$(database)/documents/adminUsers/$(request.auth.uid);
+    }
+
+    function isCurrentAdmin() {
+      return isSignedIn()
+        && exists(adminDocPath())
+        && (
+          get(adminDocPath()).data.active == true
+          || get(adminDocPath()).data.role == "admin"
+        );
+    }
+
+    match /adminUsers/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    match /news/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /teams/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /sponsors/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /programs/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /videos/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /schedule/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /horoscopePredictions/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /wordOfLife/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /jobs/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /communityUsers/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isCurrentAdmin();
+    }
+
+    match /notificationTokens/{docId} {
+      allow create: if isSignedIn();
+      allow read: if isCurrentAdmin();
+      allow update: if isSignedIn() && request.auth.uid == resource.data.uid;
+      allow delete: if isCurrentAdmin();
+    }
+
+    match /notifications/{docId} {
+      allow read: if isCurrentAdmin();
+      allow create: if isCurrentAdmin();
+      allow delete: if isCurrentAdmin();
+    }
+
+    match /userProfiles/{userId} {
+      allow read: if true;
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /player/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /agenda/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /links/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /championships/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /sportsContent/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /liveStreams/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /theme/{docId} {
+      allow read: if true;
+      allow write: if isCurrentAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

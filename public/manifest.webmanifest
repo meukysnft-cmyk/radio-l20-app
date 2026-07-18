@@ -1,0 +1,35 @@
+{
+  "name": "Rádio L20",
+  "short_name": "L20",
+  "description": "Ouça a Rádio L20 ao vivo. Notícias locais, esporte amador, transmissões e programação comunitária de Pilar, Alagoas.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0057D9",
+  "background_color": "#05070A",
+  "categories": ["news", "entertainment", "sports"],
+  "icons": [
+    {
+      "src": "/l20-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-oficial.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

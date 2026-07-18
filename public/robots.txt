@@ -1,0 +1,7 @@
+# Rádio L20 - Pilar, Alagoas
+# https://radiol20.com.br
+
+User-agent: *
+Allow: /
+
+Sitemap: https://radiol20.com.br/sitemap.xml
