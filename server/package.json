@@ -8,10 +8,9 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "campeonato-brasileiro-api": "^2.0.1",
     "cors": "^2.8.5",
-    "express": "^4.21.0",
-    "cheerio": "^1.2.0",
-    "axios": "^1.18.1"
+    "express": "^4.21.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
