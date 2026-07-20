@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { analyzePost } from './scraper.js'
+import { getAllTables } from './footballScraper.js'
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '5000', 10)
@@ -92,6 +93,16 @@ app.post('/api/analyze/batch', async (req, res) => {
   }
 
   res.json(ok(results))
+})
+
+app.get('/api/football/tables', async (_req, res) => {
+  try {
+    const tables = await getAllTables()
+    res.json(ok(tables))
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro ao buscar tabelas'
+    res.status(502).json(fail(message))
+  }
 })
 
 app.get('/api/posts', async (_req, res) => {
