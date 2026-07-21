@@ -22,6 +22,8 @@ const fallbackFeaturedNews: ContentCard = {
   isTemporary: false,
 }
 
+const SPORT_CATEGORIES = ['Esporte Local', 'Esporte Nacional', 'Esporte Internacional']
+
 const CATEGORIES = [
   'Todas',
   'Cidade',
@@ -103,6 +105,10 @@ export function NewsPage() {
 
   const visibleNewsItems = useMemo(() => {
     let filtered = newsItems
+
+    if (!selectedProgramSlug) {
+      filtered = filtered.filter((item) => !SPORT_CATEGORIES.includes(item.category || ''))
+    }
 
     if (selectedProgramSlug) {
       filtered = filtered.filter((item) => item.programSlug === selectedProgramSlug)

@@ -5,20 +5,20 @@ import {
   NewsCard,
   ScheduleCard,
   SectionHeader,
-  SportsCard,
 } from '../components/ContentCards'
 import { LivePlayer } from '../components/LivePlayer'
 import { SectionSummaries, HoroscopeSummary } from '../components/SectionSummaries'
 import { SocialActions } from '../components/SocialLinks'
 import { SponsorBanner } from '../components/SponsorBanner'
-import { SkNewsPageLayout } from '../components/Skeleton'
 import { radioRoutes } from '../config/radioLinks'
 import { radioPrograms } from '../data/programsContent'
 import { getProgramLabelBySlug } from '../data/programsContent'
 import { subscribeDocuments } from '../services/firestoreService'
 import type { NewsDocument } from '../types/content'
 import { siteContent, type ContentCard } from '../data/siteContent'
-import { IoVideocam, IoBriefcase, IoStar, IoList } from 'react-icons/io5'
+import { IoVideocam, IoBriefcase, IoStar } from 'react-icons/io5'
+
+const SPORT_CATEGORIES = ['Esporte Local', 'Esporte Nacional', 'Esporte Internacional']
 
 const fallbackFeaturedNews: ContentCard = {
   category: 'Cidade',
@@ -44,18 +44,10 @@ function toNewsCard(item: NewsDocument) {
 }
 
 function formatNewsDate(value: unknown) {
-  if (!value || typeof value !== 'object' || !('seconds' in value)) {
-    return ''
-  }
-
+  if (!value || typeof value !== 'object' || !('seconds' in value)) return ''
   const seconds = (value as { seconds: number }).seconds
   const date = new Date(seconds * 1000)
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date)
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date)
 }
 
 function QuickLinkCard({ to, icon, eyebrow, title, description }: {
@@ -78,7 +70,7 @@ function QuickLinkCard({ to, icon, eyebrow, title, description }: {
 
 export function HomePage() {
   const content = siteContent
-  const [newsItems, setNewsItems] = useState<NewsDocument[]>([])
+  const [allNews, setAllNews] = useState<NewsDocument[]>([])
 
   useEffect(() => {
     return subscribeDocuments<NewsDocument>(
@@ -89,41 +81,36 @@ export function HomePage() {
           if (first.featured !== second.featured) {
             return Number(second.featured) - Number(first.featured)
           }
-
-          const firstCreated = first.createdAt && typeof first.createdAt === 'object' && 'seconds' in first.createdAt
-            ? Number((first.createdAt as { seconds: number }).seconds)
-            : 0
-          const secondCreated = second.createdAt && typeof second.createdAt === 'object' && 'seconds' in second.createdAt
-            ? Number((second.createdAt as { seconds: number }).seconds)
-            : 0
-
-          return secondCreated - firstCreated
+          const a = 'seconds' in (first.createdAt as object) ? Number((first.createdAt as { seconds: number }).seconds) : 0
+          const b = 'seconds' in (second.createdAt as object) ? Number((second.createdAt as { seconds: number }).seconds) : 0
+          return b - a
         })
-
-        setNewsItems(sorted)
+        setAllNews(sorted)
       },
-      (error) => {
-        console.error('Falha ao ouvir notícias do Firestore.', error)
-        setNewsItems([])
-      },
+      () => setAllNews([]),
     )
   }, [])
 
+  const generalNews = useMemo(
+    () => allNews.filter((item) => !SPORT_CATEGORIES.includes(item.category || '')),
+    [allNews],
+  )
+
+  const sportNews = useMemo(
+    () => allNews.filter((item) => SPORT_CATEGORIES.includes(item.category || '')),
+    [allNews],
+  )
+
   const featuredNews = useMemo(() => {
-    const topNews = newsItems[0]
+    const top = generalNews[0]
+    return top ? toNewsCard(top) : fallbackFeaturedNews
+  }, [generalNews])
 
-    return topNews ? toNewsCard(topNews) : fallbackFeaturedNews
-  }, [newsItems])
+  const featuredNewsLink = generalNews[0] ? `/noticias/${generalNews[0].id}` : radioRoutes.news
 
-  const featuredNewsLink = newsItems[0] ? `/noticias/${newsItems[0].id}` : radioRoutes.news
-
-  const localNewsWithLinks = useMemo(
-    () =>
-      newsItems
-        .filter((item) => !item.featured)
-        .slice(0, 2)
-        .map((item) => ({ id: item.id, card: toNewsCard(item) })),
-    [newsItems],
+  const moreNews = useMemo(
+    () => generalNews.slice(0, 7).map((item) => ({ id: item.id, card: toNewsCard(item) })),
+    [generalNews],
   )
 
   const topPrograms = useMemo(() => radioPrograms.slice(0, 4), [])
@@ -135,12 +122,10 @@ export function HomePage() {
           <div className="hero-player-side">
             <LivePlayer compact />
           </div>
-
           <div className="hero-horoscope-side">
             <HoroscopeSummary premium />
           </div>
         </div>
-
         <SocialActions className="hero-social-row" />
       </section>
 
@@ -148,29 +133,36 @@ export function HomePage() {
         <div className="section-title-row">
           <SectionHeader
             eyebrow={content.sections.news.eyebrow}
-            title="Destaques de notícias"
+            title="Últimas notícias"
             description={content.sections.news.description}
           />
           <Link className="section-link" to={radioRoutes.news}>
-            Ver notícias
+            Ver todas
           </Link>
         </div>
 
-        {newsItems.length > 0 ? (
-          <div className="news-layout">
-            <Link className="news-card-link" to={featuredNewsLink}>
-              <FeaturedNewsCard item={featuredNews} />
-            </Link>
-            <div className="news-list">
-              {localNewsWithLinks.map((item) => (
+        {generalNews.length > 0 ? (
+          <>
+            <div className="news-layout">
+              <Link className="news-card-link" to={featuredNewsLink}>
+                <FeaturedNewsCard item={featuredNews} />
+              </Link>
+              <div className="news-list">
+                {moreNews.slice(1, 3).map((item) => (
+                  <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
+                    <NewsCard item={item.card} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="news-grid">
+              {moreNews.slice(3).map((item) => (
                 <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
                   <NewsCard item={item.card} />
                 </Link>
               ))}
             </div>
-          </div>
-        ) : newsItems.length === 0 ? (
-          <SkNewsPageLayout />
+          </>
         ) : (
           <div className="empty-state-card">
             <p className="card-eyebrow">Portal local</p>
@@ -182,33 +174,27 @@ export function HomePage() {
 
       <SponsorBanner className="sponsor-strip-scroll" />
 
-      <section className="content-section sport-section" id="esporte">
-        <div className="sport-intro">
-          <SectionHeader
-            eyebrow={content.sections.sport.eyebrow}
-            title={content.sections.sport.title}
-            description={content.sections.sport.description}
-          />
-          <Link className="section-link" to={radioRoutes.sport}>
-            Ver esporte
-          </Link>
-        </div>
-
-        <div className="sport-content">
-          <article className="sports-feature-card">
-            <p className="card-eyebrow">{content.sportsFeature.category}</p>
-            <h3>{content.sportsFeature.title}</h3>
-            <p>{content.sportsFeature.description}</p>
-            <span>{content.sportsFeature.meta}</span>
-          </article>
-
-          <div className="sport-grid">
-            {content.amateurSports.slice(0, 2).map((item) => (
-              <SportsCard item={item} key={item.title} />
+      {sportNews.length > 0 ? (
+        <section className="content-section" id="esporte-home">
+          <div className="section-title-row">
+            <SectionHeader
+              eyebrow="Esportes"
+              title="Notícias esportivas"
+              description="Acompanhe as principais notícias do esporte local, nacional e internacional."
+            />
+            <Link className="section-link" to={radioRoutes.sport}>
+              Ver esportes
+            </Link>
+          </div>
+          <div className="news-grid">
+            {sportNews.slice(0, 4).map((item) => (
+              <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
+                <NewsCard item={toNewsCard(item)} />
+              </Link>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <section className="content-section" id="programas-home">
         <div className="section-title-row">
@@ -245,7 +231,6 @@ export function HomePage() {
             Ver agenda
           </Link>
         </div>
-
         <div className="schedule-list">
           {content.broadcastSchedule.slice(0, 2).map((item) => (
             <ScheduleCard item={item} key={`${item.time}-${item.title}`} />
@@ -253,14 +238,12 @@ export function HomePage() {
         </div>
       </section>
 
-      <SponsorBanner className="sponsor-strip-scroll" />
-
       <section className="content-section" id="extras-home">
         <div className="section-title-row">
           <SectionHeader
             eyebrow="Mais para você"
             title="Explore a Rádio L20"
-            description="Vagas de emprego, horóscopo do dia, vídeos e muito mais conteúdo local."
+            description="Vagas, horóscopo, vídeos e muito mais."
           />
         </div>
         <div className="home-quick-grid home-quick-grid-3">
@@ -269,7 +252,7 @@ export function HomePage() {
             icon={<IoStar />}
             eyebrow={content.sections.wordOfLife.eyebrow}
             title="Horóscopo do dia"
-            description="Veja a previsão do seu signo com mensagens personalizadas."
+            description="Veja a previsão do seu signo."
           />
           <QuickLinkCard
             to={radioRoutes.videos}
@@ -297,7 +280,6 @@ export function HomePage() {
             Conhecer espaços
           </Link>
         </article>
-
         <article className="home-cta-card is-light">
           <p className="card-eyebrow">{content.sections.contact.eyebrow}</p>
           <h2>{content.sections.contact.title}</h2>
@@ -306,11 +288,10 @@ export function HomePage() {
             Entrar em contato
           </Link>
         </article>
-
         <article className="home-cta-card">
           <p className="card-eyebrow">Cadastro social</p>
-          <h2>Entre para a comunidade da Rádio L20</h2>
-          <p>Faça seu cadastro e deixe seu nome salvo para novidades, ações e participação no app.</p>
+          <h2>Entre para a comunidade</h2>
+          <p>Faça seu cadastro e receba novidades.</p>
           <Link className="advertise-primary" to={radioRoutes.register}>
             Fazer cadastro
           </Link>

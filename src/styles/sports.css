@@ -245,6 +245,9 @@
 }
 .program-card:hover { transform: translateY(-3px); border-color: rgba(30,144,255,.4); }
 .program-card-image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
+
+.section-title { margin: 24px 0 14px; font-size: 1.2rem; color: var(--text-strong); }
+.sport-news-section { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
 .program-card-info { padding: 10px 14px 14px; display: grid; gap: 4px; }
 .program-card strong { color: var(--text-strong); font-size: .88rem; }
 .program-card small { color: var(--text-muted); font-size: .72rem; }
