@@ -1,5 +1,6 @@
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY || ''
 const GEMINI_MODEL = 'gemini-1.5-flash'
+const GEMINI_API_VERSION = 'v1'
 
 type RewriteResult = {
   title: string
@@ -119,7 +120,7 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
   const prompt = buildPrompt(title, body, instructions)
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`,
+    `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${key}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
