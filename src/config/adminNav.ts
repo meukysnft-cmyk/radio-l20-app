@@ -18,6 +18,7 @@ import {
   IoSparklesOutline,
   IoBarChartOutline,
   IoChatbubblesOutline,
+  IoCreateOutline,
 } from 'react-icons/io5'
 import type { ComponentType } from 'react'
 
@@ -37,6 +38,7 @@ export const adminNavItems: AdminNavItem[] = [
   { key: 'programs', label: 'Programação', path: '/admin/programacao', icon: IoMicOutline, group: 'conteudo' },
   { key: 'liveStreams', label: 'Transmissões', path: '/admin/live-streams', icon: IoRadioOutline, group: 'conteudo' },
   { key: 'videos', label: 'Vídeos', path: '/admin/videos', icon: IoVideocamOutline, group: 'conteudo' },
+  { key: 'aiWriter', label: 'Reescrita IA', path: '/admin/reescrever', icon: IoCreateOutline, group: 'conteudo' },
   { key: 'sponsors', label: 'Patrocinadores', path: '/admin/patrocinadores', icon: IoStarOutline, group: 'engajamento' },
   { key: 'jobs', label: 'Empregos', path: '/admin/empregos', icon: IoBriefcaseOutline, group: 'engajamento' },
   { key: 'horoscope', label: 'Horóscopo', path: '/admin/horoscopo', icon: IoSparklesOutline, group: 'engajamento' },

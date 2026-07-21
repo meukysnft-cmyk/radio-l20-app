@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import { analyzePost } from './scraper.js'
 import { getAllTables, fetchNews } from './footballScraper.js'
+import { rewriteArticle } from './aiWriter.js'
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '5000', 10)
@@ -111,6 +112,21 @@ app.get('/api/football/news', async (_req, res) => {
     res.json(ok(news))
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erro ao buscar notícias'
+    res.status(502).json(fail(message))
+  }
+})
+
+app.post('/api/ai/rewrite', async (req, res) => {
+  const { url, instructions } = req.body
+  if (!url || typeof url !== 'string') {
+    res.status(400).json(fail('URL é obrigatória'))
+    return
+  }
+  try {
+    const result = await rewriteArticle(url, instructions || '')
+    res.json(ok(result))
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro ao reescrever artigo'
     res.status(502).json(fail(message))
   }
 })

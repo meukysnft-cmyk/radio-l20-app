@@ -62,6 +62,7 @@ const AdminJobsPage = lazy(() => import('./pages/admin/AdminJobsPage').then((m) 
 const AdminHoroscopePage = lazy(() => import('./pages/admin/AdminHoroscopePage').then((m) => ({ default: m.AdminHoroscopePage })))
 const AdminWordOfLifePage = lazy(() => import('./pages/admin/AdminWordOfLifePage').then((m) => ({ default: m.AdminWordOfLifePage })))
 const AdminChatPage = lazy(() => import('./pages/admin/AdminChatPage').then((m) => ({ default: m.AdminChatPage })))
+const AdminAiWriterPage = lazy(() => import('./pages/admin/cms/AdminAiWriterPage').then((m) => ({ default: m.AdminAiWriterPage })))
 
 
 function App() {
@@ -133,6 +134,7 @@ function App() {
                         <Route path="/admin/horoscopo" element={<AdminHoroscopePage />} />
                         <Route path={radioRoutes.adminWordOfLife} element={<AdminWordOfLifePage />} />
                         <Route path="/admin/chat" element={<AdminChatPage />} />
+                        <Route path="/admin/reescrever" element={<AdminAiWriterPage />} />
 
                       </Route>
                     </Route>
