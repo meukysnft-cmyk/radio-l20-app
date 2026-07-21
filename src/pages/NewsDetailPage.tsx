@@ -103,7 +103,7 @@ export function NewsDetailPage() {
           <span>{formatNewsDate(news.createdAt)}</span>
           {news.programSlug ? <span>{programName}</span> : null}
         </div>
-        <p className="news-detail-text">{news.content}</p>
+        <div className="news-detail-text" dangerouslySetInnerHTML={{ __html: news.content }} />
       </article>
 
       {news.programSlug ? (
