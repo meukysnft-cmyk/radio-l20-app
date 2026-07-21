@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom'
 import { getSportBySlug, SPORTS } from '../data/sportsData'
 import { radioRoutes } from '../config/radioLinks'
 import { subscribeDocuments } from '../services/firestoreService'
-import { FootballTables } from '../components/FootballTables'
 import type { NewsDocument } from '../types/content'
 
 export function SportDetailPage() {
@@ -55,14 +54,6 @@ export function SportDetailPage() {
           </div>
         </div>
       </div>
-
-      {/* Tables (only for Futebol) */}
-      {sport.slug === 'futebol' && (
-        <div style={{ display: 'grid', gap: 16, marginBottom: 24 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-strong)', margin: 0 }}>Classificação</h2>
-          <FootballTables slugs={['brasileirao-serie-a', 'brasileirao-serie-b', 'brasileirao-serie-c', 'libertadores']} />
-        </div>
-      )}
 
       {/* News */}
       <div style={{ display: 'grid', gap: 16 }}>
