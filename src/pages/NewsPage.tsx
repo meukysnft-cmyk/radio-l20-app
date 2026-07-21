@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FeaturedNewsCard, NewsCard, BlogCard, SectionHeader } from '../components/ContentCards'
 import { Link, useSearchParams } from 'react-router-dom'
 import { radioRoutes } from '../config/radioLinks'
@@ -49,6 +49,8 @@ const SPORTS_CATEGORIES = [
   'Esporte Internacional',
 ]
 
+const SPORT_CATEGORIES_SET = new Set(['Esporte Local', 'Esporte Nacional', 'Esporte Internacional'])
+
 const ITEMS_PER_PAGE = 12
 
 function toNewsCard(item: NewsDocument) {
@@ -78,6 +80,29 @@ function formatNewsDate(value: unknown) {
   }).format(date)
 }
 
+function playToggleSound() {
+  try {
+    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.type = 'sawtooth'
+    gain.gain.setValueAtTime(0.08, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+    osc.frequency.setValueAtTime(200, ctx.currentTime)
+    osc.frequency.linearRampToValueAtTime(600, ctx.currentTime + 0.15)
+    osc.start(ctx.currentTime)
+    osc.stop(ctx.currentTime + 0.3)
+  } catch {
+  }
+}
+
+function getItemSection(item: NewsDocument): 'general' | 'sports' {
+  if (item.section) return item.section
+  return SPORT_CATEGORIES_SET.has(item.category) ? 'sports' : 'general'
+}
+
 export function NewsPage() {
   const content = siteContent
   const [newsItems, setNewsItems] = useState<NewsDocument[]>([])
@@ -89,6 +114,8 @@ export function NewsPage() {
   const [section, setSection] = useState<'general' | 'sports'>('general')
   const [activeCategory, setActiveCategory] = useState('Todas')
   const [currentPage, setCurrentPage] = useState(1)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const mainRef = useRef<HTMLDivElement>(null)
 
   const isGeneral = section === 'general'
   const categories = isGeneral ? GENERAL_CATEGORIES : SPORTS_CATEGORIES
@@ -126,7 +153,7 @@ export function NewsPage() {
   const visibleNewsItems = useMemo(() => {
     let filtered = newsItems
 
-    filtered = filtered.filter((item) => (item.section || 'general') === section)
+    filtered = filtered.filter((item) => getItemSection(item) === section)
 
     if (selectedProgramSlug) {
       filtered = filtered.filter((item) => item.programSlug === selectedProgramSlug)
@@ -155,13 +182,26 @@ export function NewsPage() {
     [visibleNewsItems, currentPage],
   )
 
+  function handleToggle(target: 'general' | 'sports') {
+    if (target === section) return
+    playToggleSound()
+    setIsTransitioning(true)
+    setSection(target)
+    setActiveCategory('Todas')
+    if (mainRef.current) {
+      mainRef.current.classList.remove('news-page-general', 'news-page-sports')
+      mainRef.current.classList.add(target === 'general' ? 'news-page-general' : 'news-page-sports')
+    }
+    setTimeout(() => setIsTransitioning(false), 500)
+  }
+
   function goToPage(page: number) {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
-    <section className={`content-section page-section ${sectionClass}`}>
+    <section ref={mainRef} className={`content-section page-section ${sectionClass}${isTransitioning ? ' is-transitioning' : ''}`}>
       <SectionHeader
         eyebrow={content.sections.news.eyebrow}
         title={selectedProgramLabel ? `Notícias de ${selectedProgramLabel}` : content.sections.news.title}
@@ -172,23 +212,25 @@ export function NewsPage() {
         }
       />
 
-      <div className="news-section-toggle">
+      <div className="news-lever-toggle">
+        <span className={`news-lever-label${isGeneral ? ' is-active' : ''}`}>
+          <span className="news-lever-icon">&#128240;</span>
+          Gerais
+        </span>
         <button
           type="button"
-          className={`news-section-btn${isGeneral ? ' is-active' : ''}`}
-          onClick={() => { setSection('general'); setActiveCategory('Todas') }}
+          className={`news-lever${isGeneral ? '' : ' is-sports'}`}
+          onClick={() => handleToggle(isGeneral ? 'sports' : 'general')}
+          aria-label={isGeneral ? 'Mudar para notícias esportivas' : 'Mudar para notícias gerais'}
         >
-          <span className="news-section-icon">&#128240;</span>
-          Notícias Gerais
+          <span className="news-lever-knob">
+            {isGeneral ? '⚽' : '🏀'}
+          </span>
         </button>
-        <button
-          type="button"
-          className={`news-section-btn${!isGeneral ? ' is-active' : ''}`}
-          onClick={() => { setSection('sports'); setActiveCategory('Todas') }}
-        >
-          <span className="news-section-icon">&#9917;</span>
-          Notícias Esportivas
-        </button>
+        <span className={`news-lever-label${!isGeneral ? ' is-active' : ''}`}>
+          <span className="news-lever-icon">&#9917;</span>
+          Esportivas
+        </span>
       </div>
 
       {selectedProgramLabel ? (
