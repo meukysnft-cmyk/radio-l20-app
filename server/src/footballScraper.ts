@@ -9,6 +9,22 @@ export type TeamRow = {
   gp: number
   gc: number
   sg: number
+  ultimos: string[]
+}
+
+export type MatchData = {
+  phase: string
+  chaves: {
+    home: string
+    homeLogo: string
+    homeScore?: number
+    away: string
+    awayLogo: string
+    awayScore?: number
+    date: string
+    time: string
+    played: boolean
+  }[]
 }
 
 export type LeagueTable = {
@@ -16,6 +32,7 @@ export type LeagueTable = {
   slug: string
   updatedAt: string
   teams: TeamRow[]
+  matches?: MatchData
 }
 
 type SerieConfig = {
@@ -30,6 +47,7 @@ const SERIES: SerieConfig[] = [
   { code: 'b', name: 'Brasileirão Série B', slug: 'brasileirao-serie-b', url: 'https://ge.globo.com/futebol/brasileirao-serie-b/' },
   { code: 'c', name: 'Brasileirão Série C', slug: 'brasileirao-serie-c', url: 'https://ge.globo.com/futebol/brasileirao-serie-c/' },
   { code: 'd', name: 'Brasileirão Série D', slug: 'brasileirao-serie-d', url: 'https://ge.globo.com/futebol/brasileirao-serie-d/' },
+  { code: 'lib', name: 'Libertadores', slug: 'libertadores', url: 'https://ge.globo.com/futebol/libertadores/' },
 ]
 
 const CACHE_TTL = 30 * 60 * 1000
@@ -92,6 +110,7 @@ function parseEntry(entry: any, slug: string): TeamRow {
     gp: entry.gols_pro ?? 0,
     gc: entry.gols_contra ?? 0,
     sg: entry.saldo_gols ?? 0,
+    ultimos: entry.ultimos ?? [],
   }
 }
 
@@ -116,14 +135,54 @@ async function fetchSerie(serie: SerieConfig): Promise<LeagueTable | null> {
       }
     }
 
-    if (!teams.length) return null
-
-    return {
-      league: serie.name,
-      slug: serie.slug,
-      updatedAt: new Date().toISOString(),
-      teams,
+    if (teams.length) {
+      return {
+        league: serie.name,
+        slug: serie.slug,
+        updatedAt: new Date().toISOString(),
+        teams,
+      }
     }
+
+    if (data.secao && data.fase) {
+      const chaves = []
+      for (const secao of data.secao) {
+        for (const chave of secao.chave || []) {
+          for (const jogo of chave.jogos || []) {
+            const home = jogo.equipes?.mandante
+            const away = jogo.equipes?.visitante
+            if (!home || !away) continue
+            const hasScore = jogo.placar_oficial_mandante != null && jogo.placar_oficial_visitante != null
+            chaves.push({
+              home: home.nome_popular || '',
+              homeLogo: home.escudo || '',
+              homeScore: hasScore ? jogo.placar_oficial_mandante : undefined,
+              away: away.nome_popular || '',
+              awayLogo: away.escudo || '',
+              awayScore: hasScore ? jogo.placar_oficial_visitante : undefined,
+              date: jogo.data_realizacao || '',
+              time: jogo.hora_realizacao || '',
+              played: hasScore,
+            })
+          }
+        }
+      }
+
+      if (chaves.length) {
+        return {
+          league: serie.name,
+          slug: serie.slug,
+          updatedAt: new Date().toISOString(),
+          teams: [],
+          matches: {
+            phase: data.fase.nome || '',
+            chaves,
+          },
+        }
+      }
+    }
+
+    return null
   } catch {
     return null
   }
