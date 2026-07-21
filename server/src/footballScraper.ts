@@ -60,6 +60,17 @@ export type MatchData = {
   groups?: GroupData[]
 }
 
+export type NewsItem = {
+  id: string
+  title: string
+  description: string
+  source: string
+  sourceUrl: string
+  articleUrl: string
+  imageUrl: string
+  publishedAt: string
+}
+
 export type LeagueTable = {
   league: string
   slug: string
@@ -356,6 +367,106 @@ async function fetchGroupsFromOpta(logoMap?: Record<string, string>): Promise<Gr
     return groupsData
   } catch {
     return []
+  }
+}
+
+const NEWS_CACHE_TTL = 15 * 60 * 1000
+let newsCache: { data: NewsItem[]; timestamp: number } | null = null
+
+function parseRSS(xml: string): NewsItem[] {
+  const items: NewsItem[] = []
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g
+  let m: RegExpExecArray | null
+  while ((m = itemRegex.exec(xml)) !== null) {
+    const block = m[1]
+    const title = block.match(/<title>(.*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/, '$1').trim() || ''
+    const googleUrl = block.match(/<link>(.*?)<\/link>/)?.[1]?.trim() || ''
+    const pubDate = block.match(/<pubDate>(.*?)<\/pubDate>/)?.[1]?.trim() || ''
+    const source = block.match(/<source[^>]*>([^<]*)<\/source>/)?.[1]?.trim() || ''
+    const sourceUrl = block.match(/<source url="([^"]*)"/)?.[1]?.trim() || ''
+    const descMatch = block.match(/<description>(.*?)<\/description>/s)
+    let description = ''
+    if (descMatch) {
+      const decoded = descMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      const textMatch = decoded.replace(/<[^>]+>/g, '').trim()
+      description = textMatch || ''
+    }
+    if (title && googleUrl) {
+      const id = googleUrl.replace(/^.*\/([^/?]+).*$/, '$1').slice(0, 60) || String(items.length)
+      items.push({
+        id,
+        title,
+        description,
+        source,
+        sourceUrl,
+        articleUrl: googleUrl,
+        imageUrl: '',
+        publishedAt: pubDate,
+      })
+    }
+  }
+  return items
+}
+
+const NEWS_IMG_CACHE_TTL = 60 * 60 * 1000
+const newsImgCache = new Map<string, string>()
+
+async function resolveOgImage(url: string): Promise<string | null> {
+  const trimmed = url.trim()
+  if (!trimmed || newsImgCache.has(trimmed)) {
+    return newsImgCache.get(trimmed) || null
+  }
+  try {
+    const res = await fetch(trimmed, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'text/html',
+      },
+      redirect: 'follow',
+      signal: AbortSignal.timeout(8000),
+    })
+    if (!res.ok) { newsImgCache.set(trimmed, ''); return null }
+    const html = await res.text()
+    const ogMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]*)"/i) || html.match(/<meta\s+content="([^"]*)"\s+property="og:image"/i)
+    const img = ogMatch?.[1] || ''
+    newsImgCache.set(trimmed, img)
+    return img || null
+  } catch {
+    newsImgCache.set(trimmed, '')
+    return null
+  }
+}
+
+const GOOGLE_NEWS_RSS = 'https://news.google.com/rss/search?q=libertadores+ge+lance+uol&hl=pt-BR&gl=BR&ceid=BR:pt-pt'
+
+export async function fetchNews(): Promise<NewsItem[]> {
+  if (newsCache && Date.now() - newsCache.timestamp < NEWS_CACHE_TTL) {
+    return newsCache.data
+  }
+  try {
+    const res = await fetch(GOOGLE_NEWS_RSS, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) return newsCache?.data || []
+    const xml = await res.text()
+    let items = parseRSS(xml)
+    items = items.filter(i => i.title.length > 15).slice(0, 25)
+    if (!items.length) return newsCache?.data || []
+    const withImages = await Promise.allSettled(
+      items.map(async (item) => {
+        const img = await resolveOgImage(item.articleUrl)
+        return { ...item, imageUrl: img || '' }
+      })
+    )
+    items = []
+    for (const r of withImages) {
+      if (r.status === 'fulfilled') items.push(r.value)
+    }
+    newsCache = { data: items, timestamp: Date.now() }
+    return items
+  } catch {
+    return newsCache?.data || []
   }
 }
 

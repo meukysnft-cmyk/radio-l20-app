@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { analyzePost } from './scraper.js'
-import { getAllTables } from './footballScraper.js'
+import { getAllTables, fetchNews } from './footballScraper.js'
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '5000', 10)
@@ -101,6 +101,16 @@ app.get('/api/football/tables', async (_req, res) => {
     res.json(ok(tables))
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erro ao buscar tabelas'
+    res.status(502).json(fail(message))
+  }
+})
+
+app.get('/api/football/news', async (_req, res) => {
+  try {
+    const news = await fetchNews()
+    res.json(ok(news))
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro ao buscar notícias'
     res.status(502).json(fail(message))
   }
 })

@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import type { LeagueTable, GroupData, NewsDocument } from '../types/content'
-import type { ContentCard } from '../data/siteContent'
-import { fetchLeagueTables } from '../services/footballApi'
-import { subscribeDocuments } from '../services/firestoreService'
+import type { LeagueTable, GroupData, NewsItem } from '../types/content'
+import { fetchLeagueTables, fetchNews } from '../services/footballApi'
 import { NewsCard } from './ContentCards'
 import { LibertadoresBracket } from './LibertadoresBracket'
 
@@ -70,14 +67,10 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
   const [subTab, setSubTab] = useState<SubTab>('chaveamento')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [news, setNews] = useState<NewsDocument[]>([])
+  const [news, setNews] = useState<NewsItem[]>([])
 
   useEffect(() => {
-    return subscribeDocuments<NewsDocument>('news', (docs) => {
-      setNews(
-        docs.filter(d => d.status === 'published' && d.category.toLowerCase().includes('libertadores'))
-      )
-    })
+    fetchNews().then(setNews).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -248,16 +241,15 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
                 {news.length > 0 ? (
                   news.map(item => (
                     <NewsCard key={item.id} item={{
-                      category: item.category || 'Libertadores',
+                      category: item.source || 'Libertadores',
                       title: item.title,
-                      description: item.excerpt || item.content || '',
-                      meta: item.author || 'Rádio L20',
-                      author: item.author || 'Rádio L20',
+                      description: item.description.slice(0, 200),
+                      meta: item.source,
+                      author: item.source,
                       imageUrl: item.imageUrl || '',
                       publishedAt: (() => {
-                        const d = item.createdAt as any
-                        if (!d || !d.seconds) return ''
-                        return new Date(d.seconds * 1000).toLocaleDateString('pt-BR')
+                        if (!item.publishedAt) return ''
+                        return new Date(item.publishedAt).toLocaleDateString('pt-BR')
                       })(),
                       isTemporary: false,
                     }} />

@@ -315,6 +315,17 @@ export type LeagueTable = {
   matches?: MatchData
 }
 
+export type NewsItem = {
+  id: string
+  title: string
+  description: string
+  source: string
+  sourceUrl: string
+  articleUrl: string
+  imageUrl: string
+  publishedAt: string
+}
+
 export type LiveStreamStatus = 'scheduled' | 'live' | 'ended' | 'archived'
 
 export type LiveStreamDocument = FirestoreMeta & {
