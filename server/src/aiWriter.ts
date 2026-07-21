@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY || ''
-const GEMINI_MODELS = ['gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-2.5-flash-lite']
+const GEMINI_MODELS = ['gemini-2.0-flash-lite', 'gemini-2.0-flash']
 const GEMINI_API_VERSION = 'v1'
 
 type RewriteResult = {
@@ -169,9 +169,9 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         if (msg === 'QUOTA_EXCEEDED') {
-          lastError = `Cota excedida no modelo ${model}. ${model === GEMINI_MODELS[GEMINI_MODELS.length - 1] ? 'Todos os modelos disponíveis estão sem cota. Tente novamente mais tarde ou ative faturamento no Google AI Studio.' : `Tentando próximo modelo...`}`
+          lastError = `Cota excedida no modelo ${model}. ${model === GEMINI_MODELS[GEMINI_MODELS.length - 1] ? 'Cota gratuita diária esgotada. Acesse https://aistudio.google.com/apikey e ative faturamento (com limite) para continuar usando, ou aguarde até o reset (24h).' : `Tentando próximo modelo...`}`
           await sleep(1000)
-          break // move to next model
+          break
         }
         if (attempt === 1) lastError = msg
       }
