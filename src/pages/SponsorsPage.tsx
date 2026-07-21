@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useContext } from 'react'
 import { SponsorBanner, SectionHeader } from '../components/ContentCards'
 import { radioRoutes, radioSocialLinks } from '../config/radioLinks'
 import { useAuth } from '../context/useAuth'
-import { subscribeDocuments } from '../services/firestoreService'
-import type { SponsorDocument } from '../types/content'
+import { SponsorsContext } from '../context/sponsorsState'
 import { siteContent } from '../data/siteContent'
 
 type SponsorView = {
@@ -21,16 +20,7 @@ export function SponsorsPage() {
   const content = siteContent
   const { isAdmin } = useAuth()
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false)
-  const [sponsors, setSponsors] = useState<Array<SponsorDocument & { id: string }>>([])
-
-  useEffect(() => {
-    const unsubscribe = subscribeDocuments<SponsorDocument>('sponsors', (items) => {
-      const activeItems = items.filter((item) => item.active !== false && item.status !== 'archived')
-      setSponsors(activeItems)
-    })
-
-    return unsubscribe
-  }, [])
+  const { sponsors } = useContext(SponsorsContext)
 
   const orderedSponsors = useMemo(() => {
     const list = [...sponsors]
@@ -45,11 +35,7 @@ export function SponsorsPage() {
       })) as SponsorView[]
     }
 
-    return list.sort((a, b) => {
-      const orderA = a.displayOrder ?? 0
-      const orderB = b.displayOrder ?? 0
-      return orderA - orderB
-    }) as SponsorView[]
+    return list as SponsorView[]
   }, [content.temporarySponsors, sponsors])
 
   const [rotatedSponsors, setRotatedSponsors] = useState(orderedSponsors)

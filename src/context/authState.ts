@@ -6,6 +6,7 @@ export type AuthContextValue = {
   loading: boolean
   isLoading: boolean
   isAdmin: boolean
+  adminRole: string | null
   adminLoading: boolean
   authError: string
   loginWithGoogle: () => Promise<void>

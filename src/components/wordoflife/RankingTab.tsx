@@ -1,26 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useWordOfLifePostsRealtime } from '../../hooks/useWordOfLifePosts'
 import { useDeletePost } from '../../hooks/useDeletePost'
-import type { FirestoreRecord } from '../../services/firestoreService'
-import type { WordOfLifePost } from '../../types/wordOfLife'
 
 function formatNumber(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M'
   if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'K'
   return String(n)
-}
-
-function buildWhatsAppText(posts: FirestoreRecord<WordOfLifePost>[]): string {
-  const medals = ['🥇', '🥈', '🥉']
-  const lines = posts
-    .sort((a, b) => b.metrics.views - a.metrics.views)
-    .slice(0, 10)
-    .map((p, i) => {
-      const medal = i < 3 ? `${medals[i]} ` : `${i + 1}º `
-      return `${medal}#${p.shortcode}\n   👁️ ${formatNumber(p.metrics.views)} views · ❤️ ${formatNumber(p.metrics.likes)} curtidas · 💬 ${formatNumber(p.metrics.comments)} coment.`
-    })
-
-  return `📊 *Ranking Palavra de Vida*\n\n${lines.join('\n\n')}\n\n🔗 Acesse: ${window.location.origin}/palavra-de-vida`
 }
 
 type SortKey = 'views' | 'likes' | 'comments' | 'engagementRate'
@@ -32,7 +17,7 @@ export function RankingTab() {
   const { remove } = useDeletePost()
 
   const ranked = useMemo(() => {
-    const sorted = [...posts].sort((a: FirestoreRecord<WordOfLifePost>, b: FirestoreRecord<WordOfLifePost>) => {
+    const sorted = [...posts].sort((a, b) => {
       const va = (a.metrics as Record<string, number>)[sortBy] || 0
       const vb = (b.metrics as Record<string, number>)[sortBy] || 0
       return vb - va
@@ -52,15 +37,18 @@ export function RankingTab() {
     }
   }
 
-  function handleShareWhatsApp() {
-    const text = buildWhatsAppText(posts)
-    const encoded = encodeURIComponent(text)
-    window.open(`https://wa.me/?text=${encoded}`, '_blank')
+  function getRankingUrl() {
+    return `${window.location.origin}/ranking-palavra-de-vida.html`
   }
 
-  function handleCopyWhatsApp() {
-    const text = buildWhatsAppText(posts)
-    navigator.clipboard.writeText(text).catch(() => {})
+  function handleShareWhatsApp() {
+    const url = getRankingUrl()
+    const text = encodeURIComponent(`📊 Acesse o Ranking Palavra de Vida:\n\n${url}`)
+    window.open(`https://wa.me/?text=${text}`, '_blank')
+  }
+
+  function handleCopyLink() {
+    navigator.clipboard.writeText(getRankingUrl()).catch(() => {})
   }
 
   function handleRefresh() {
@@ -78,8 +66,8 @@ export function RankingTab() {
           <button type="button" className="wol-action-btn wol-share-btn" onClick={handleShareWhatsApp}>
             Compartilhar WhatsApp
           </button>
-          <button type="button" className="wol-action-btn wol-copy-btn" onClick={handleCopyWhatsApp}>
-            Copiar texto
+          <button type="button" className="wol-action-btn wol-copy-btn" onClick={handleCopyLink}>
+            Copiar link
           </button>
         </div>
       </div>

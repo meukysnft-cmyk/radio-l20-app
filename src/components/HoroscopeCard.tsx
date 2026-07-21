@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getSignSvg } from '../utils/zodiac'
+import { getSignSlug } from '../data/signProfiles'
+import { radioRoutes } from '../config/radioLinks'
 
 export type HoroscopePeriodData = {
   message: string
@@ -69,15 +73,27 @@ export function HoroscopeCard({ sign }: { sign: HoroscopeSignData }) {
   const periodData = sign[activeTab]
   const colorHex = resolveColor(sign.daily.color)
 
+  const signSvg = getSignSvg(sign.name)
+
   return (
     <details className="horoscope-card">
       <summary>
+        {signSvg ? (
+          <img className="horoscope-card-icon" src={signSvg} alt="" width={56} height={56} />
+        ) : null}
         <span>
           <small>{sign.element}</small>
           <strong>{sign.name}</strong>
           <em>{sign.period}</em>
         </span>
         <span className="horoscope-toggle">Ver detalhes</span>
+        <Link
+          to={`${radioRoutes.horoscope}/${getSignSlug(sign.name)}`}
+          className="horoscope-card-sign-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Ver signo &rarr;
+        </Link>
       </summary>
 
       <div className="horoscope-card-period-tabs">

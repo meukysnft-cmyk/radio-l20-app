@@ -5,7 +5,7 @@ import { radioPrograms } from '../data/programsContent'
 import { horoscopeContent } from '../data/horoscopeContent'
 import { subscribeDocuments, getDocument } from '../services/firestoreService'
 import { useAuth } from '../context/useAuth'
-import { getZodiacFromBirthday, ZODIAC_SIGNS } from '../utils/zodiac'
+import { getZodiacFromBirthday, ZODIAC_SIGNS, ELEMENT_EMOJI, ELEMENT_LABELS, getSignSvg } from '../utils/zodiac'
 import type { JobDocument, UserProfileDocument } from '../types/content'
 import { siteContent } from '../data/siteContent'
 
@@ -49,7 +49,7 @@ function VideosSummary() {
   )
 }
 
-export function HoroscopeSummary() {
+export function HoroscopeSummary({ premium = false }: { premium?: boolean }) {
   const { user } = useAuth()
   const [todayIndex] = useState(getTodaySignIndex)
   const [userSignIndex, setUserSignIndex] = useState<number | null>(null)
@@ -72,13 +72,47 @@ export function HoroscopeSummary() {
   const sign = ZODIAC_SIGNS[activeIndex]
   const content = horoscopeContent.signs[activeIndex] || horoscopeContent.signs[0]
 
+  const signSlug = sign.name
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+
+  if (premium) {
+    const svg = getSignSvg(sign.name)
+    return (
+      <Link className={`holo-premium holo-premium-${signSlug}`} to={radioRoutes.horoscope}>
+        <div className="holo-premium-illustration">
+          {svg ? <img src={svg} alt="" width={180} height={180} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
+        </div>
+        <div className="holo-premium-info">
+          <span className="holo-premium-element">{ELEMENT_EMOJI[sign.element]} {ELEMENT_LABELS[sign.element]}</span>
+          <h3 className="holo-premium-name">{sign.name}</h3>
+          <p className="holo-premium-message">{content.message}</p>
+          <span className="holo-premium-cta">Ver previsão completa →</span>
+        </div>
+      </Link>
+    )
+  }
+
+  const svg = getSignSvg(sign.name)
+
   return (
-    <Link className="summary-card summary-card-horoscope-top" to={radioRoutes.horoscope}>
-      <span className="summary-icon" aria-hidden="true">{sign.symbol}</span>
-      <p className="summary-eyebrow">Seu Horóscopo de Hoje</p>
-      <h3>{sign.name}</h3>
-      <p className="summary-desc">{content.message}</p>
-      <span className="summary-cta">Ler previsão completa →</span>
+    <Link className={`holo-card holo-${signSlug}`} to={radioRoutes.horoscope}>
+      <div className="holo-bg">
+        <span className="holo-orb holo-orb-1" aria-hidden="true" />
+        <span className="holo-orb holo-orb-2" aria-hidden="true" />
+        <span className="holo-orb holo-orb-3" aria-hidden="true" />
+      </div>
+      <div className="holo-content">
+        <div className="holo-symbol-wrap">
+          {svg ? <img src={svg} alt="" width={100} height={100} style={{ width: 100, height: 100, objectFit: 'contain' }} /> : null}
+        </div>
+        <p className="holo-element">{ELEMENT_EMOJI[sign.element]} {ELEMENT_LABELS[sign.element]}</p>
+        <h3 className="holo-name">{sign.name}</h3>
+        <p className="holo-period">{sign.period}</p>
+        <p className="holo-message">{content.message}</p>
+        <span className="holo-cta">Ver previsão completa →</span>
+      </div>
     </Link>
   )
 }

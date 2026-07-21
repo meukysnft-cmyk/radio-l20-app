@@ -70,6 +70,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
+    document.documentElement.setAttribute('data-style', themeStyleId)
     localStorage.setItem(THEME_KEY, theme)
 
     const css = buildStyleCss(themeStyleId, theme)

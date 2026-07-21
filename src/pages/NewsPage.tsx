@@ -3,6 +3,7 @@ import { FeaturedNewsCard, NewsCard, SectionHeader } from '../components/Content
 import { Link, useSearchParams } from 'react-router-dom'
 import { radioRoutes } from '../config/radioLinks'
 import { getProgramLabelBySlug } from '../data/programsContent'
+import { SkNewsPageLayout } from '../components/Skeleton'
 import type { NewsDocument } from '../types/content'
 import { siteContent, type ContentCard } from '../data/siteContent'
 import { subscribeDocuments } from '../services/firestoreService'
@@ -129,7 +130,9 @@ export function NewsPage() {
         </div>
       ) : null}
 
-      {visibleNewsItems.length > 0 ? (
+      {newsItems.length === 0 ? (
+        <SkNewsPageLayout />
+      ) : visibleNewsItems.length > 0 ? (
         <div className="news-layout">
           <Link className="news-card-link" to={featuredNewsLink}>
             <FeaturedNewsCard item={featuredNews} />

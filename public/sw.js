@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v4'
+const CACHE_VERSION = 'v5'
 const APP_CACHE = `radio-l20-app-${CACHE_VERSION}`
 const IMAGES_CACHE = `radio-l20-images-${CACHE_VERSION}`
 const FONTS_CACHE = `radio-l20-fonts-${CACHE_VERSION}`

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking Palavra de Vida - Rádio L20</title>
+  <meta name="description" content="Ranking de desempenho dos reels do programa Palavra de Vida no Instagram.">
+  <meta property="og:title" content="Ranking Palavra de Vida - Rádio L20">
+  <meta property="og:description" content="Acompanhe o desempenho dos reels do programa no Instagram.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #f5f2ed;
+      color: #333;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #0a3e8c, #1565c0);
+      color: #fff;
+      padding: 32px 20px;
+      text-align: center;
+    }
+    .header h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+    .header p { font-size: .85rem; opacity: .85; }
+    .container { max-width: 700px; margin: 0 auto; padding: 16px; }
+    .filters {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 99px;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #555;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .filter-btn:hover { border-color: #e63946; color: #e63946; }
+    .filter-btn.active { background: #e63946; border-color: #e63946; color: #fff; }
+    .loading {
+      text-align: center;
+      padding: 60px 0;
+      color: #888;
+      font-size: .9rem;
+    }
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid #e0dcd6;
+      border-top-color: #e63946;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .list { display: grid; gap: 10px; }
+    .card {
+      display: grid;
+      grid-template-columns: 36px 56px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border: 1px solid #e0dcd6;
+      border-radius: 12px;
+      background: #fff;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .card:hover { border-color: #e63946; box-shadow: 0 2px 8px rgba(230,57,70,.08); }
+    .card.top1 { border-color: #ffd700; background: linear-gradient(135deg, rgba(255,215,0,.06), transparent); }
+    .card.top2 { border-color: #c0c0c0; background: linear-gradient(135deg, rgba(192,192,192,.06), transparent); }
+    .card.top3 { border-color: #cd7f32; background: linear-gradient(135deg, rgba(205,127,50,.05), transparent); }
+    .rank { font-size: 1.1rem; font-weight: 800; text-align: center; color: #888; }
+    .top1 .rank, .top2 .rank, .top3 .rank { color: #333; }
+    .thumb { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; }
+    .info { min-width: 0; }
+    .shortcode { color: #888; font-size: .72rem; font-weight: 700; }
+    .caption {
+      color: #555;
+      font-size: .85rem;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stats {
+      display: flex;
+      gap: 12px;
+      font-size: .78rem;
+      color: #888;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .cta {
+      display: block;
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #e63946;
+      font-weight: 700;
+      font-size: .8rem;
+      padding-top: 4px;
+    }
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #888;
+    }
+    .footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: .75rem;
+      color: #aaa;
+    }
+    @media (max-width: 500px) {
+      .card { grid-template-columns: 32px 48px 1fr; }
+      .stats { grid-column: 1 / -1; width: 100%; justify-content: flex-start; padding-top: 2px; }
+      .cta { padding-top: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Ranking Palavra de Vida</h1>
+    <p>Desempenho dos reels no Instagram</p>
+  </div>
+
+  <div class="container">
+    <div class="filters">
+      <button class="filter-btn active" data-sort="views">Views</button>
+      <button class="filter-btn" data-sort="likes">Curtidas</button>
+      <button class="filter-btn" data-sort="comments">Comentários</button>
+    </div>
+    <div id="app"><div class="loading"><div class="spinner"></div>Carregando ranking...</div></div>
+  </div>
+
+  <div class="footer">Rádio L20 - Palavra de Vida</div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBF39Wd0GzDt1rp987rVl_eHbcYVE2XKTc",
+      authDomain: "canal-l20.firebaseapp.com",
+      projectId: "canal-l20",
+      storageBucket: "canal-l20.firebasestorage.app",
+      messagingSenderId: "1026826011488",
+      appId: "1:1026826011488:web:52dbed1361312dd287d405"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const appEl = document.getElementById('app');
+
+    let allPosts = [];
+    let sortBy = 'views';
+
+    function fmt(n) {
+      if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+      return String(n);
+    }
+
+    function render() {
+      const sorted = [...allPosts].sort((a, b) => (b.metrics?.[sortBy] || 0) - (a.metrics?.[sortBy] || 0));
+      if (!sorted.length) { appEl.innerHTML = '<div class="empty">Nenhum post analisado ainda.</div>'; return; }
+      const medals = ['🥇', '🥈', '🥉'];
+      appEl.innerHTML = '<div class="list">' + sorted.map((p, i) => {
+        const cls = i < 3 ? ` top${i + 1}` : '';
+        const rank = i < 3 ? medals[i] : '#' + (i + 1);
+        const m = p.metrics || {};
+        return `<a class="card${cls}" href="${p.url || '#'}" target="_blank" rel="noopener noreferrer">
+          <span class="rank">${rank}</span>
+          ${p.imageUrl ? `<img class="thumb" src="${p.imageUrl}" alt="" loading="lazy">` : '<span></span>'}
+          <div class="info">
+            <span class="shortcode">#${p.shortcode || ''}</span>
+            <p class="caption">${p.caption ? p.caption.slice(0, 100) : 'Sem legenda'}</p>
+          </div>
+          <div class="stats">
+            <span>👁️ ${fmt(m.views || 0)}</span>
+            <span>❤️ ${fmt(m.likes || 0)}</span>
+            <span>💬 ${fmt(m.comments || 0)}</span>
+          </div>
+          <span class="cta">Ver no Instagram →</span>
+        </a>`;
+      }).join('') + '</div>';
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelector('.filter-btn.active').classList.remove('active');
+        btn.classList.add('active');
+        sortBy = btn.dataset.sort;
+        render();
+      });
+    });
+
+    try {
+      const snapshot = await getDocs(collection(db, 'wordOfLife'));
+      allPosts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    } catch (err) {
+      appEl.innerHTML = '<div class="empty">Erro ao carregar dados.</div>';
+      console.error(err);
+    }
+  </script>
+</body>
+</html>

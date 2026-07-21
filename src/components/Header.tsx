@@ -1,16 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { radioDesktopNavItems, radioRoutes } from '../config/radioLinks'
 import { useAudioPlayer } from '../context/useAudioPlayer'
 import { useAuth } from '../context/useAuth'
+import { useLiveStatus } from '../context/useLiveStatus'
 import { useTheme } from '../context/useTheme'
-import { subscribeDocuments } from '../services/firestoreService'
 import { hasCommunityAccess } from '../routes/RequireCommunityAccess'
 import { Logo } from './Logo'
 import { NotificationToggle } from './NotificationToggle'
 import { PwaInstallButton } from './PwaInstallButton'
 import { WeatherWidget } from './WeatherWidget'
-import type { PlayerDocument, ProgramDocument, LiveStreamDocument } from '../types/content'
 
 type HeaderProps = {
   onMenuClick: () => void
@@ -21,33 +19,9 @@ export function Header({ onMenuClick, isMenuOpen }: HeaderProps) {
   const { isPlaying, isLoading, togglePlayback } = useAudioPlayer()
   const { user, loginWithGoogle, logout, isAdmin } = useAuth()
   const { theme, toggleTheme } = useTheme()
-  const [player, setPlayer] = useState<PlayerDocument | null>(null)
-  const [programs, setPrograms] = useState<Array<ProgramDocument & { id: string }>>([])
-  const [liveStreams, setLiveStreams] = useState<Array<LiveStreamDocument & { id: string }>>([])
+  const { isLive } = useLiveStatus()
   const playerLabel = isLoading ? 'Carregando…' : isPlaying ? 'Pausar rádio' : 'Ouvir ao vivo'
   const userName = user?.displayName || user?.email?.split('@')[0] || 'Ouvinte'
-
-  useEffect(() => {
-    const unsubPlayer = subscribeDocuments<PlayerDocument>('player', (docs) => {
-      if (docs.length > 0) setPlayer(docs[0])
-    })
-    const unsubPrograms = subscribeDocuments<ProgramDocument>('programs', (docs) => {
-      setPrograms(docs)
-    })
-    const unsubStreams = subscribeDocuments<LiveStreamDocument>('liveStreams', (docs) => {
-      setLiveStreams(docs)
-    })
-    return () => { unsubPlayer(); unsubPrograms(); unsubStreams() }
-  }, [])
-
-  const isLive = useMemo(() => {
-    if (player?.isLive) return true
-    if (player?.youtubeIsLive && !!player?.youtubeLiveUrl) return true
-    if (player?.instagramIsLive && !!player?.instagramLiveUrl) return true
-    if (programs.some((p) => p.liveStatus === 'live')) return true
-    if (liveStreams.some((s) => s.status === 'live')) return true
-    return false
-  }, [player, programs, liveStreams])
 
   const desktopItems = radioDesktopNavItems.filter(
     (item) =>

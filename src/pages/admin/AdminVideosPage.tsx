@@ -8,14 +8,16 @@ import {
   updateDocument,
   type FirestoreRecord,
 } from '../../services/firestoreService'
-import type { ContentStatus, VideoDocument } from '../../types/content'
+import type { ContentStatus, VideoDocument, VideoPlatform } from '../../types/content'
+import { getPlatformLabel, getVideoEmbedUrl } from '../../utils/videoEmbed'
 import '../../styles/admin.css'
 import { ModulePage } from './cms/ModulePage'
 
 type VideoFormState = {
   title: string
   category: string
-  youtubeUrl: string
+  platform: VideoPlatform
+  videoUrl: string
   description: string
   status: ContentStatus
 }
@@ -23,7 +25,8 @@ type VideoFormState = {
 const emptyVideoForm: VideoFormState = {
   title: '',
   category: 'Destaque',
-  youtubeUrl: '',
+  platform: 'youtube',
+  videoUrl: '',
   description: '',
   status: 'draft',
 }
@@ -46,48 +49,12 @@ function getStatusLabel(status: ContentStatus) {
   return labels[status]
 }
 
-function normalizeYouTubeUrl(input: string) {
-  const value = input.trim()
-
-  if (!value) {
-    return ''
-  }
-
-  try {
-    const url = new URL(value)
-    const videoId = url.searchParams.get('v')
-
-    if (videoId) {
-      return `https://www.youtube.com/watch?v=${videoId}`
-    }
-
-    return url.toString()
-  } catch {
-    return value
-  }
-}
-
-function getVideoEmbedUrl(url: string) {
-  try {
-    const parsedUrl = new URL(url)
-
-    if (parsedUrl.hostname.includes('youtu.be')) {
-      const videoId = parsedUrl.pathname.split('/').filter(Boolean)[0]
-
-      return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
-    }
-
-    const videoId = parsedUrl.searchParams.get('v')
-
-    if (videoId) {
-      return `https://www.youtube.com/embed/${videoId}`
-    }
-  } catch {
-    return ''
-  }
-
-  return ''
-}
+const PLATFORM_OPTIONS: { value: VideoPlatform; label: string }[] = [
+  { value: 'youtube', label: 'YouTube / Shorts' },
+  { value: 'instagram', label: 'Instagram Reel' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'facebook', label: 'Facebook' },
+]
 
 export function AdminVideosPage() {
   const [videos, setVideos] = useState<Array<FirestoreRecord<VideoDocument>>>([])
@@ -142,12 +109,13 @@ export function AdminVideosPage() {
     const payload: Omit<VideoDocument, 'id' | 'createdAt' | 'updatedAt'> = {
       title: form.title.trim(),
       category: form.category.trim(),
-      youtubeUrl: normalizeYouTubeUrl(form.youtubeUrl),
+      platform: form.platform,
+      videoUrl: form.videoUrl.trim(),
       description: form.description.trim(),
       status: form.status,
     }
 
-    if (!payload.title || !payload.youtubeUrl) {
+    if (!payload.title || !payload.videoUrl) {
       setErrorMessage('Informe pelo menos o título e o link do vídeo.')
       setIsSaving(false)
       return
@@ -177,7 +145,8 @@ export function AdminVideosPage() {
     setForm({
       title: item.title || '',
       category: item.category || 'Destaque',
-      youtubeUrl: item.youtubeUrl || '',
+      platform: item.platform || 'youtube',
+      videoUrl: item.videoUrl || '',
       description: item.description || '',
       status: item.status || 'draft',
     })
@@ -238,26 +207,46 @@ export function AdminVideosPage() {
             </label>
 
             <label>
-              Status
+              Plataforma
               <select
-                onChange={(event) => updateForm('status', event.target.value as ContentStatus)}
-                value={form.status}
+                onChange={(event) => updateForm('platform', event.target.value as VideoPlatform)}
+                value={form.platform}
               >
-                <option value="draft">Rascunho</option>
-                <option value="published">Publicado</option>
-                <option value="archived">Arquivado</option>
+                {PLATFORM_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
             </label>
           </div>
 
           <label>
-            Link do YouTube
+            Status
+            <select
+              onChange={(event) => updateForm('status', event.target.value as ContentStatus)}
+              value={form.status}
+            >
+              <option value="draft">Rascunho</option>
+              <option value="published">Publicado</option>
+              <option value="archived">Arquivado</option>
+            </select>
+          </label>
+
+          <label>
+            Link do vídeo ({getPlatformLabel(form.platform)})
             <input
               inputMode="url"
-              onChange={(event) => updateForm('youtubeUrl', event.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
+              onChange={(event) => updateForm('videoUrl', event.target.value)}
+              placeholder={
+                form.platform === 'youtube'
+                  ? 'https://www.youtube.com/watch?v=...'
+                  : form.platform === 'instagram'
+                    ? 'https://www.instagram.com/reel/...'
+                    : form.platform === 'tiktok'
+                      ? 'https://www.tiktok.com/@user/video/...'
+                      : 'https://www.facebook.com/watch/?v=...'
+              }
               required
-              value={form.youtubeUrl}
+              value={form.videoUrl}
             />
           </label>
 
@@ -308,21 +297,27 @@ export function AdminVideosPage() {
           ) : null}
 
           {orderedVideos.map((item) => {
-            const embedUrl = getVideoEmbedUrl(item.youtubeUrl)
+            const plat = item.platform || 'youtube'
+            const embedUrl = getVideoEmbedUrl(item.videoUrl, plat)
 
             return (
               <article className="admin-news-card" key={item.id}>
                 <div>
                   <span>{item.category || 'Sem categoria'}</span>
+                  <span className="admin-video-platform-tag">{getPlatformLabel(plat)}</span>
                   <h3>{item.title}</h3>
                   <p>{item.description || 'Sem descrição cadastrada.'}</p>
-                  <small>{item.youtubeUrl}</small>
+                  <small>{item.videoUrl}</small>
                 </div>
 
                 <dl>
                   <div>
                     <dt>Status</dt>
                     <dd>{getStatusLabel(item.status || 'draft')}</dd>
+                  </div>
+                  <div>
+                    <dt>Plataforma</dt>
+                    <dd>{getPlatformLabel(plat)}</dd>
                   </div>
                   <div>
                     <dt>Prévia</dt>

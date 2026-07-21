@@ -1,21 +1,38 @@
 import type { HoroscopeSignData } from '../components/HoroscopeCard'
+import { ZODIAC_SIGNS } from '../utils/zodiac'
 
 const AZTRO_API = 'https://aztro.sameerkumar.website/'
 
-const SIGNS_PT: Array<{ name: string; key: string; period: string; element: string }> = [
-  { name: 'Áries', key: 'aries', period: '21/03 a 20/04', element: 'Fogo' },
-  { name: 'Touro', key: 'taurus', period: '21/04 a 20/05', element: 'Terra' },
-  { name: 'Gêmeos', key: 'gemini', period: '21/05 a 20/06', element: 'Ar' },
-  { name: 'Câncer', key: 'cancer', period: '21/06 a 22/07', element: 'Água' },
-  { name: 'Leão', key: 'leo', period: '23/07 a 22/08', element: 'Fogo' },
-  { name: 'Virgem', key: 'virgo', period: '23/08 a 22/09', element: 'Terra' },
-  { name: 'Libra', key: 'libra', period: '23/09 a 22/10', element: 'Ar' },
-  { name: 'Escorpião', key: 'scorpio', period: '23/10 a 21/11', element: 'Água' },
-  { name: 'Sagitário', key: 'sagittarius', period: '22/11 a 21/12', element: 'Fogo' },
-  { name: 'Capricórnio', key: 'capricorn', period: '22/12 a 20/01', element: 'Terra' },
-  { name: 'Aquário', key: 'aquarius', period: '21/01 a 19/02', element: 'Ar' },
-  { name: 'Peixes', key: 'pisces', period: '20/02 a 20/03', element: 'Água' },
-]
+const CACHE_KEY = 'radio-l20-horoscope-cache'
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000
+
+const SIGNS_PT: Array<{ name: string; key: string; period: string; element: string }> =
+  ZODIAC_SIGNS.map((s) => ({
+    name: s.name,
+    key: s.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
+    period: s.period,
+    element: s.element.charAt(0).toUpperCase() + s.element.slice(1),
+  }))
+
+const KEY_MAP: Record<string, string> = {
+  'aries': 'aries',
+  'touro': 'taurus',
+  'gemeos': 'gemini',
+  'cancer': 'cancer',
+  'leao': 'leo',
+  'virgem': 'virgo',
+  'libra': 'libra',
+  'escorpiao': 'scorpio',
+  'sagitario': 'sagittarius',
+  'capricornio': 'capricorn',
+  'aquario': 'aquarius',
+  'peixes': 'pisces',
+}
+
+SIGNS_PT.forEach((s) => {
+  const mapped = KEY_MAP[s.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')]
+  if (mapped) s.key = mapped
+})
 
 const COLORS = [
   'Vermelho', 'Azul', 'Verde', 'Amarelo', 'Roxo', 'Rosa',
@@ -147,6 +164,27 @@ function mapAztroToSignData(
   }
 }
 
+function getCachedData(): HoroscopeSignData[] | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const { data, timestamp } = JSON.parse(raw) as { data: HoroscopeSignData[]; timestamp: number }
+    if (Date.now() - timestamp > CACHE_TTL_MS) {
+      localStorage.removeItem(CACHE_KEY)
+      return null
+    }
+    return data
+  } catch {
+    return null
+  }
+}
+
+function setCachedData(data: HoroscopeSignData[]) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }))
+  } catch { /* quota exceeded or private mode */ }
+}
+
 async function tryAztroAPI(): Promise<HoroscopeSignData[]> {
   const results = await Promise.allSettled(
     SIGNS_PT.map(async (pt, idx) => {
@@ -164,9 +202,15 @@ async function tryAztroAPI(): Promise<HoroscopeSignData[]> {
 }
 
 export async function fetchTodayHoroscope(): Promise<HoroscopeSignData[]> {
+  const cached = getCachedData()
+  if (cached && cached.length > 0) return cached
+
   try {
     const fromAPI = await tryAztroAPI()
-    if (fromAPI.length > 0) return fromAPI
+    if (fromAPI.length > 0) {
+      setCachedData(fromAPI)
+      return fromAPI
+    }
   } catch {
     // API unavailable
   }

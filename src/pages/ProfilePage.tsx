@@ -8,6 +8,7 @@ import { THEME_STYLES, ACCENT_PRESETS } from '../context/themeState'
 import { storage } from '../lib/firebase'
 import { getDocument, setDocument } from '../services/firestoreService'
 import { getZodiacFromBirthday, ELEMENT_EMOJI, ELEMENT_LABELS } from '../utils/zodiac'
+import { SkProfileForm, SkPageHeader, SkCard, SkLine, SkCircle, Sk } from '../components/Skeleton'
 import type { UserProfileDocument } from '../types/content'
 
 const INTEREST_OPTIONS = [
@@ -164,10 +165,29 @@ export function ProfilePage() {
   if (loading) {
     return (
       <section className="content-section page-section profile-page" aria-labelledby="profile-title">
-        <div className="section-header">
-          <p className="eyebrow">Conta</p>
-          <h1 id="profile-title">Meu Perfil</h1>
-          <p>Carregando...</p>
+        <SkPageHeader />
+        <div className="profile-layout">
+          <SkProfileForm />
+          <SkCard style={{ display: 'grid', gap: 12 }}>
+            <SkLine width="80px" height="0.65rem" />
+            <SkLine width="200px" height="1.2rem" />
+            <SkLine width="100%" height="0.85rem" />
+            <SkLine width="90%" height="0.85rem" />
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8 }}>
+              <SkCircle width={48} />
+              <div style={{ display: 'grid', gap: 4, flex: 1 }}>
+                <SkLine width="120px" height="0.95rem" />
+                <SkLine width="80px" height="0.75rem" />
+              </div>
+            </div>
+            <SkLine width="70px" height="0.65rem" style={{ marginTop: 8 }} />
+            <div style={{ display: 'flex', gap: 6 }}>
+              <Sk width="40px" height="24px" radius="var(--radius-sm)" />
+              <Sk width="40px" height="24px" radius="var(--radius-sm)" />
+              <Sk width="40px" height="24px" radius="var(--radius-sm)" />
+              <Sk width="40px" height="24px" radius="var(--radius-sm)" />
+            </div>
+          </SkCard>
         </div>
       </section>
     )

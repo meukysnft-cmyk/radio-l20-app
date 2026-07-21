@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useCallback, useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
 import './styles/cms.css'
@@ -11,6 +11,7 @@ import { radioRoutes } from './config/radioLinks'
 import { AuthProvider } from './context/AuthContext'
 import { AudioPlayerProvider } from './context/AudioPlayerContext'
 import { SponsorsProvider } from './context/SponsorsContext'
+import { LiveStatusProvider } from './context/LiveStatusContext'
 import { ThemeProvider } from './context/ThemeProvider'
 import { RequireAuth } from './routes/RequireAuth'
 import { RequireCommunityAccess } from './routes/RequireCommunityAccess'
@@ -34,8 +35,11 @@ const ContactPage = lazy(() => import('./pages/ContactPage').then((m) => ({ defa
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })))
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 const AppLoginPage = lazy(() => import('./pages/AppLoginPage').then((m) => ({ default: m.AppLoginPage })))
+const SignDetailPage = lazy(() => import('./pages/SignDetailPage').then((m) => ({ default: m.SignDetailPage })))
+const SportDetailPage = lazy(() => import('./pages/SportDetailPage').then((m) => ({ default: m.SportDetailPage })))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
 const WordOfLifeRankingPage = lazy(() => import('./pages/WordOfLifeRankingPage').then((m) => ({ default: m.WordOfLifeRankingPage })))
+const ChatPage = lazy(() => import('./pages/ChatPage').then((m) => ({ default: m.ChatPage })))
 
 /* CMS admin pages */
 const AdminDashboard = lazy(() => import('./pages/admin/cms/AdminDashboard').then((m) => ({ default: m.AdminDashboard })))
@@ -57,18 +61,21 @@ const AdminLivePage = lazy(() => import('./pages/admin/AdminLivePage').then((m) 
 const AdminJobsPage = lazy(() => import('./pages/admin/AdminJobsPage').then((m) => ({ default: m.AdminJobsPage })))
 const AdminHoroscopePage = lazy(() => import('./pages/admin/AdminHoroscopePage').then((m) => ({ default: m.AdminHoroscopePage })))
 const AdminWordOfLifePage = lazy(() => import('./pages/admin/AdminWordOfLifePage').then((m) => ({ default: m.AdminWordOfLifePage })))
+const AdminChatPage = lazy(() => import('./pages/admin/AdminChatPage').then((m) => ({ default: m.AdminChatPage })))
 
 
 function App() {
   const [showSplash, setShowSplash] = useState(true)
+  const onSplashComplete = useCallback(() => setShowSplash(false), [])
 
   return (
     <ThemeProvider>
     <AudioPlayerProvider>
       <SponsorsProvider>
+        <LiveStatusProvider>
         <AuthProvider>
           <BrowserRouter>
-          {showSplash ? <SplashScreen onComplete={() => setShowSplash(false)} /> : null}
+          {showSplash ? <SplashScreen onComplete={onSplashComplete} /> : null}
 
           <ErrorBoundary>
             <Suspense
@@ -83,6 +90,7 @@ function App() {
                     <Route path={radioRoutes.news} element={<NewsPage />} />
                     <Route path="/noticias/:id" element={<NewsDetailPage />} />
                     <Route path={radioRoutes.sport} element={<SportsPage />} />
+                    <Route path={`${radioRoutes.sport}/:slug`} element={<SportDetailPage />} />
                     <Route path={radioRoutes.schedule} element={<SchedulePage />} />
                     <Route path={radioRoutes.programs} element={<ProgramsPage />} />
                     <Route path="/programas/:slug" element={<ProgramDetailPage />} />
@@ -90,10 +98,12 @@ function App() {
                     <Route path={radioRoutes.sponsors} element={<SponsorsPage />} />
                     <Route path={radioRoutes.videos} element={<VideosPage />} />
                     <Route path={radioRoutes.horoscope} element={<HoroscopePage />} />
+                    <Route path={`${radioRoutes.horoscope}/:slug`} element={<SignDetailPage />} />
                     <Route path={radioRoutes.wordOfLife} element={<WordOfLifePage />} />
                     <Route path="/palavra-de-vida/ranking" element={<WordOfLifeRankingPage />} />
                     <Route path={radioRoutes.jobs} element={<JobsPage />} />
                     <Route path={radioRoutes.contact} element={<ContactPage />} />
+                    <Route path={radioRoutes.chat} element={<ChatPage />} />
                   </Route>
                   <Route path={radioRoutes.register} element={<RegisterPage />} />
                   <Route path={radioRoutes.profile} element={<ProfilePage />} />
@@ -122,6 +132,7 @@ function App() {
                         <Route path={radioRoutes.adminJobs} element={<AdminJobsPage />} />
                         <Route path="/admin/horoscopo" element={<AdminHoroscopePage />} />
                         <Route path={radioRoutes.adminWordOfLife} element={<AdminWordOfLifePage />} />
+                        <Route path="/admin/chat" element={<AdminChatPage />} />
 
                       </Route>
                     </Route>
@@ -134,6 +145,7 @@ function App() {
           </ErrorBoundary>
         </BrowserRouter>
       </AuthProvider>
+      </LiveStatusProvider>
       </SponsorsProvider>
     </AudioPlayerProvider>
     </ThemeProvider>

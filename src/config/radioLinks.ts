@@ -25,6 +25,7 @@ export const radioRoutes = {
   contact: '/contato',
   register: '/cadastro',
   profile: '/perfil',
+  chat: '/bate-papo',
   admin: '/admin',
   adminLogin: '/admin/login',
   adminNews: '/admin/noticias',
@@ -61,6 +62,7 @@ export const radioDesktopNavItems = [
   { label: 'Anuncie', to: radioRoutes.advertise },
   { label: 'Patrocinadores', to: radioRoutes.sponsors },
   { label: 'Contato', to: radioRoutes.contact },
+  { label: 'Chat', to: radioRoutes.chat },
   { label: 'Cadastro', to: radioRoutes.register },
   { label: 'Admin', to: radioRoutes.admin },
 ] as const
@@ -84,6 +86,7 @@ export const radioBottomNavItems = [
   { label: 'Esporte', to: radioRoutes.sport, marker: 'ES' },
   { label: 'Vídeos', to: radioRoutes.videos, marker: 'VD' },
   { label: 'Horóscopo', to: radioRoutes.horoscope, marker: 'HR' },
+  { label: 'Chat', to: radioRoutes.chat, marker: 'CH' },
   { label: 'Empregos', to: radioRoutes.jobs, marker: 'EM' },
 ] as const
 

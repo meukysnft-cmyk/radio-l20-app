@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { subscribeDocuments } from '../services/firestoreService'
 import { SectionHeader } from '../components/ContentCards'
+import { SkJobCard, Sk, SkGrid } from '../components/Skeleton'
 import { siteContent } from '../data/siteContent'
 import type { JobDocument } from '../types/content'
 
@@ -89,7 +90,17 @@ export function JobsPage() {
       ) : null}
 
       {isLoading ? (
-        <p className="jobs-loading">Carregando vagas...</p>
+        <>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <Sk width="100%" height="42px" radius="var(--radius-md)" />
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+            {Array.from({ length: 7 }, (_, i) => (
+              <Sk key={i} width={60 + (i % 3) * 20} height="32px" radius="var(--radius-pill)" />
+            ))}
+          </div>
+          <SkGrid count={4}>{() => <SkJobCard />}</SkGrid>
+        </>
       ) : filteredJobs.length === 0 ? (
         <div className="jobs-empty">
           <p>{siteContent.jobs.emptyState}</p>

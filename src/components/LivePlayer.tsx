@@ -21,9 +21,7 @@ export function LivePlayer({ compact = false }: { compact?: boolean }) {
 
       <div className="player-main-row">
         <div className="station-lockup">
-          <div className="station-badge station-badge-logo" aria-hidden="true">
-            <img src="/Logo-fone.svg" alt="" />
-          </div>
+          <img src="/Logo-fone.svg" alt="" className="station-logo-direct" />
           <div className="station-info">
             <p className="station-name">{content.radio.name}</p>
             <strong className="station-status">{content.radio.livePlayer.stationStatus}</strong>

@@ -1,18 +1,9 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { subscribeDocuments } from '../services/firestoreService'
 import { radioRoutes } from '../config/radioLinks'
-import type { PlayerDocument } from '../types/content'
+import { useLiveStatus } from '../context/useLiveStatus'
 
 export function LiveBanner() {
-  const [player, setPlayer] = useState<PlayerDocument | null>(null)
-
-  useEffect(() => {
-    const unsub = subscribeDocuments<PlayerDocument>('player', (docs) => {
-      setPlayer(docs.length > 0 ? docs[0] : null)
-    })
-    return () => unsub()
-  }, [])
+  const { player } = useLiveStatus()
 
   const isYouTubeLive = player?.youtubeIsLive || false
   const isInstagramLive = player?.instagramIsLive || false

@@ -19,6 +19,8 @@ export const firestoreCollections = [
   'notifications',
   'userProfiles',
   'liveStreams',
+  'chatMessages',
+  'chatBlockedUsers',
 ] as const
 
 export type FirestoreCollectionName = (typeof firestoreCollections)[number]
@@ -90,10 +92,13 @@ export type ProgramDocument = FirestoreMeta & {
   liveEndedAt?: unknown
 }
 
+export type VideoPlatform = 'youtube' | 'instagram' | 'tiktok' | 'facebook'
+
 export type VideoDocument = FirestoreMeta & {
   title: string
   category: string
-  youtubeUrl: string
+  platform: VideoPlatform
+  videoUrl: string
   description: string
   status: ContentStatus
 }
@@ -236,6 +241,56 @@ export type UserProfileDocument = FirestoreMeta & {
   zodiacSign?: string
   horoscopeNotification?: boolean
   horoscopeNotificationTime?: string
+}
+
+export type TeamRow = {
+  pos: number
+  name: string
+  pts: number
+  pj: number
+  v: number
+  e: number
+  d: number
+  gp: number
+  gc: number
+  sg: number
+  ultimos: string[]
+}
+
+export type MatchChave = {
+  home: string
+  homeLogo: string
+  homeScore?: number
+  away: string
+  awayLogo: string
+  awayScore?: number
+  date: string
+  time: string
+  played: boolean
+}
+
+export type Scorer = {
+  pos: number
+  name: string
+  position: string
+  team: string
+  teamLogo: string
+  photo: string
+  goals: number
+}
+
+export type MatchData = {
+  phase: string
+  chaves: MatchChave[]
+  scorers?: Scorer[]
+}
+
+export type LeagueTable = {
+  league: string
+  slug: string
+  updatedAt: string
+  teams: TeamRow[]
+  matches?: MatchData
 }
 
 export type LiveStreamStatus = 'scheduled' | 'live' | 'ended' | 'archived'

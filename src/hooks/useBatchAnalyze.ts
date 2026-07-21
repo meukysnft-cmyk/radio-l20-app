@@ -41,10 +41,14 @@ export function useBatchAnalyze() {
 
       for (const item of results) {
         if (item.post) {
-          createDocument('wordOfLife', {
-            ...item.post,
-            analyzedBy: user?.uid || 'anonymous',
-          }).catch(() => {})
+          try {
+            await createDocument('wordOfLife', {
+              ...item.post,
+              analyzedBy: user?.uid || 'anonymous',
+            })
+          } catch (err) {
+            console.error('Erro ao salvar post analisado:', err)
+          }
         }
       }
 

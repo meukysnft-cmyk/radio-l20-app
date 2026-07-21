@@ -1,0 +1,162 @@
+:root {
+  color-scheme: dark;
+  --bg: #03060b;
+  --bg-elevated: #071b35;
+  --bg-soft: rgba(7, 27, 53, 0.66);
+  --surface: rgba(7, 26, 51, 0.88);
+  --surface-deep: rgba(5, 7, 10, 0.92);
+  --surface-overlay: rgba(5, 7, 10, 0.96);
+  --brand-tint: rgba(0, 87, 217, 0.16);
+  --accent-tint: rgba(255, 212, 0, 0.12);
+  --line: rgba(176, 191, 220, 0.12);
+  --text: #d0dbef;
+  --text-secondary: #a2b3cd;
+  --text-muted: #8493ad;
+  --text-strong: #ffffff;
+  --text-on-accent: #ffffff;
+  --brand: #0a4ec9;
+  --brand-bright: #2e8fff;
+  --accent: #f3c71a;
+  --ink: #06162d;
+  --error: #ffb0a8;
+  --success: #85e7bc;
+  --shadow-soft: 0 16px 34px rgba(0, 0, 0, 0.24);
+  --shadow-blue: 0 16px 34px rgba(10, 78, 201, 0.2);
+  --card: rgba(7, 26, 51, 0.88);
+  --accent-strong: rgba(255, 212, 0, 0.8);
+  --text-main: #d0dbef;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f7fb;
+  --bg-elevated: #ffffff;
+  --bg-soft: rgba(230, 235, 245, 0.8);
+  --surface: rgba(235, 240, 250, 0.75);
+  --surface-deep: rgba(225, 232, 245, 0.82);
+  --surface-overlay: rgba(255, 255, 255, 0.97);
+  --brand-tint: rgba(10, 78, 201, 0.08);
+  --accent-tint: rgba(212, 168, 0, 0.1);
+  --line: rgba(0, 0, 0, 0.08);
+  --text: #1e293b;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --text-strong: #0f172a;
+  --text-on-accent: #ffffff;
+  --brand: #0a4ec9;
+  --brand-bright: #1a6fd4;
+  --accent: #d4a800;
+  --ink: #ffffff;
+  --error: #c53030;
+  --success: #276749;
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-blue: 0 4px 16px rgba(10, 78, 201, 0.1);
+  --card: rgba(235, 240, 250, 0.75);
+  --accent-strong: rgba(212, 168, 0, 0.8);
+  --text-main: #1e293b;
+}
+
+html {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(46, 143, 255, 0.12), transparent 40%),
+    radial-gradient(ellipse at 80% 0%, var(--accent-tint), transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(10, 78, 201, 0.06), transparent 50%),
+    var(--bg);
+}
+
+[data-theme="light"] html,
+[data-theme="light"] {
+  background: var(--bg);
+}
+[data-theme="light"] .hero-section::before,
+[data-theme="light"] .hero-split::before { opacity: .3; }
+[data-theme="light"] body::before { opacity: .25; }
+
+[data-theme="light"] .section-header h2 { color: var(--text-strong); }
+[data-theme="light"] .hero-section h1,
+[data-theme="light"] .page-hero h1,
+[data-theme="light"] .contact-page-hero h1,
+[data-theme="light"] .horoscope-page .section-header h1 {
+  background: linear-gradient(135deg, #0f172a 0%, rgba(15,23,42,.85) 50%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+[data-theme="light"] .empty-state-card h3 { color: var(--text-strong); }
+[data-theme="light"] .program-detail-card h2 { color: var(--text-strong); }
+[data-theme="light"] .register-sidecard h2 { color: var(--text-strong); }
+[data-theme="light"] .advertise-secondary,
+[data-theme="light"] .contact-card-action { color: var(--text-strong); }
+[data-theme="light"] .user-name { color: var(--text-strong); }
+[data-theme="light"] .close-menu-btn { color: var(--text-strong); background: rgba(0,0,0,.04); }
+[data-theme="light"] .sidenav-link:hover { color: var(--text-strong); background: rgba(10,78,217,.1); }
+[data-theme="light"] .sidenav-link.is-active { color: var(--text-strong); background: linear-gradient(135deg, rgba(10,78,217,.12), rgba(212,168,0,.06)); }
+[data-theme="light"] .mobile-bottom-nav .nav-item.active { color: var(--text-strong); background: rgba(10,78,217,.12); }
+[data-theme="light"] .desktop-nav-link:hover,
+[data-theme="light"] .desktop-nav-link.is-active { color: var(--text-strong); }
+[data-theme="light"] .pwa-install-badge,
+[data-theme="light"] .pwa-install-icon { color: var(--text-strong); }
+[data-theme="light"] .news-program-tag { color: #0a4ec9; }
+
+[data-theme="light"] .news-related-block { background: var(--bg-soft); }
+[data-theme="light"] .program-logo-frame { background: var(--bg-soft); }
+[data-theme="light"] .sponsor-inline-media { background: var(--bg-soft); }
+[data-theme="light"] .sponsor-banner-preview { background: var(--bg-soft); }
+[data-theme="light"] .home-page .sport-intro,
+[data-theme="light"] .home-page .section-title-row { background: transparent; }
+[data-theme="light"] .desktop-nav { background: var(--bg-soft); }
+[data-theme="light"] .home-page .hero-section,
+[data-theme="light"] .home-page .hero-split { background: transparent; }
+
+[data-theme="light"] .news-card-image { border-color: rgba(0,0,0,.06); background: rgba(0,0,0,.02); }
+[data-theme="light"] .news-detail-image { border-color: rgba(0,0,0,.06); }
+[data-theme="light"] .news-detail-meta span { background: rgba(0,0,0,.04); }
+[data-theme="light"] .news-card-meta span { background: rgba(0,0,0,.04); }
+[data-theme="light"] .program-live-promo-image { background: rgba(0,0,0,.04); }
+[data-theme="light"] .admin-program-cover { background: rgba(0,0,0,.04); }
+[data-theme="light"] .empty-state-card { border-color: rgba(0,0,0,.1); }
+[data-theme="light"] .sponsor-strip-item { background: rgba(0,0,0,.02); }
+
+[data-theme="light"] .news-card,
+[data-theme="light"] .sport-card,
+[data-theme="light"] .program-card,
+[data-theme="light"] .video-card,
+[data-theme="light"] .horoscope-card,
+[data-theme="light"] .jobs-card,
+[data-theme="light"] .contact-card,
+[data-theme="light"] .advertise-benefit-card,
+[data-theme="light"] .summary-card,
+[data-theme="light"] .sponsor-banner,
+[data-theme="light"] .word-card,
+[data-theme="light"] .featured-news-card,
+[data-theme="light"] .sports-feature-card,
+[data-theme="light"] .home-cta-card,
+[data-theme="light"] .sponsor-card,
+[data-theme="light"] .news-detail-card,
+[data-theme="light"] .schedule-item,
+[data-theme="light"] .empty-state-card,
+[data-theme="light"] .register-card,
+[data-theme="light"] .register-sidecard,
+[data-theme="light"] .program-detail-card,
+[data-theme="light"] .team-card,
+[data-theme="light"] .theme-style-card,
+[data-theme="light"] .sidenav-quick-card {
+  background: linear-gradient(145deg, rgba(225,232,245,0.82), rgba(240,244,252,0.75));
+  box-shadow: 0 4px 20px rgba(0,0,0,.05);
+}
+
+body {
+  background: transparent;
+  color: var(--text);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.02), transparent 14%),
+    radial-gradient(circle at 10% 10%, rgba(46, 143, 255, 0.05), transparent 26%),
+    radial-gradient(circle at 90% 0%, rgba(243, 199, 26, 0.04), transparent 22%);
+  opacity: 0.8;
+}

@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { radioRoutes } from '../config/radioLinks'
 import { useAuth } from '../context/useAuth'
 import { hasCommunityAccess } from '../routes/RequireCommunityAccess'
+import { FloatingChat } from './FloatingChat'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { LiveBanner } from './LiveBanner'
@@ -150,6 +151,7 @@ export function AppLayout() {
 
       {!isAuthPage && !isLockedOnboarding ? <Footer /> : null}
       {!isAuthPage && !isLockedOnboarding ? <MobileBottomNav /> : null}
+      {!isAuthPage && !isLockedOnboarding ? <FloatingChat /> : null}
     </div>
   )
 }

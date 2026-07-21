@@ -1,89 +1,67 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { SectionHeader, SportsCard, TeamCard } from '../components/ContentCards'
 import { radioRoutes } from '../config/radioLinks'
-import { siteContent, type ContentCard } from '../data/siteContent'
-import { teamsContent } from '../data/teamsContent'
-import { getDocument } from '../services/firestoreService'
-import type { SportsContentDocument } from '../types/content'
+import { SPORTS } from '../data/sportsData'
+import { FootballTables } from '../components/FootballTables'
 
-const fallbackFeatured: ContentCard = siteContent.sportsFeature
-const fallbackAmateur: ContentCard[] = siteContent.amateurSports
-const fallbackCallout = siteContent.sportsCallout
+type Tab = 'local' | 'nacional' | 'internacional'
+
+const TABS: { key: Tab; label: string; icon: string }[] = [
+  { key: 'local', label: 'Esporte Local', icon: '📍' },
+  { key: 'nacional', label: 'Esporte Nacional', icon: '🇧🇷' },
+  { key: 'internacional', label: 'Esporte Internacional', icon: '🌍' },
+]
 
 export function SportsPage() {
-  const content = siteContent
-  const [firestoreData, setFirestoreData] = useState<SportsContentDocument | null>(null)
-
-  useEffect(() => {
-    getDocument<SportsContentDocument>('sportsContent', 'main').then((doc) => {
-      if (doc) setFirestoreData(doc)
-    })
-  }, [])
-
-  const featured: ContentCard = firestoreData?.featured
-    ? { ...firestoreData.featured, isTemporary: false }
-    : fallbackFeatured
-
-  const amateurCards: ContentCard[] = firestoreData?.amateurCards?.length
-    ? firestoreData.amateurCards.map((c) => ({ ...c, isTemporary: false }))
-    : fallbackAmateur
-
-  const callout = firestoreData?.callout ?? fallbackCallout
+  const [tab, setTab] = useState<Tab>('local')
 
   return (
-    <section className="content-section sport-section page-section">
-      <div className="sport-intro">
-        <SectionHeader
-          eyebrow={content.sections.sport.eyebrow}
-          title={content.sections.sport.title}
-          description={content.sections.sport.description}
-        />
-        <Link className="section-link" to={radioRoutes.schedule}>
-          {content.sections.sport.actionLabel}
-        </Link>
+    <section className="content-section sport-section page-section" aria-labelledby="sport-title">
+      <h1 id="sport-title" className="sr-only">Esportes</h1>
+
+      <div className="sport-tabs">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            className={`sport-tab${tab === t.key ? ' is-active' : ''}`}
+            onClick={() => setTab(t.key)}
+            type="button"
+          >
+            <span className="sport-tab-icon">{t.icon}</span>
+            <span className="sport-tab-label">{t.label}</span>
+          </button>
+        ))}
       </div>
 
-      <div className="sport-content">
-        <article className="sports-feature-card">
-          <p className="card-eyebrow">{featured.category}</p>
-          <h3>{featured.title}</h3>
-          <p>{featured.description}</p>
-          <span>{featured.meta}</span>
-        </article>
-
-        <div className="sport-grid">
-          {amateurCards.map((item) => (
-            <SportsCard item={item} key={item.title} />
+      {tab === 'local' && (
+        <div className="sport-grid-4">
+          {SPORTS.map((s) => (
+            <Link
+              key={s.name}
+              to={`${radioRoutes.sport}/${s.slug}`}
+              className="sport-card-4"
+              style={{ '--sport-color': s.color } as React.CSSProperties}
+            >
+              <span className="sport-card-4-icon">{s.icon}</span>
+              <h3>{s.name}</h3>
+            </Link>
           ))}
         </div>
+      )}
 
-        <div className="team-showcase" aria-label="Times locais">
-          <div>
-            <p className="card-eyebrow">Times locais</p>
-            <h3>Equipes do esporte amador de Pilar</h3>
-            <p>
-              Times, atletas e equipes que movimentam o esporte amador da cidade.
-            </p>
-          </div>
-
-          <div className="team-grid">
-            {teamsContent.map((item) => (
-              <TeamCard item={item} key={item.name} />
-            ))}
-          </div>
+      {tab === 'nacional' && (
+        <div>
+          <p className="ft-sub" style={{ marginBottom: 14 }}>Campeonatos nacionais com classificação atualizada.</p>
+          <FootballTables slugs={['brasileirao-serie-a', 'brasileirao-serie-b', 'brasileirao-serie-c']} />
         </div>
+      )}
 
-        <div className="sports-callout">
-          <div>
-            <h3>{callout.title}</h3>
-            <p>{callout.description}</p>
-          </div>
-          <Link className="section-link" to={radioRoutes.schedule}>
-            {callout.actionLabel}
-          </Link>
+      {tab === 'internacional' && (
+        <div>
+          <p className="ft-sub" style={{ marginBottom: 14 }}>Competições internacionais com classificação atualizada.</p>
+          <FootballTables slugs={['libertadores']} />
         </div>
-      </div>
+      )}
     </section>
   )
 }

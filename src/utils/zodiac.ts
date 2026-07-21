@@ -79,3 +79,22 @@ export function getZodiacFromBirthday(birthday: string): ZodiacSign | null {
 export function getSignByKey(key: string): ZodiacSign | undefined {
   return ZODIAC_SIGNS.find((s) => s.name.toLowerCase() === key.toLowerCase())
 }
+
+const SIGN_SVG_MAP: Record<string, string> = {
+  'Áries': '/Signos/aries.svg',
+  'Touro': '/Signos/touro.svg',
+  'Gêmeos': '/Signos/gemeos.svg',
+  'Câncer': '/Signos/cancer.svg',
+  'Leão': '/Signos/leao.svg',
+  'Virgem': '/Signos/virgem.svg',
+  'Libra': '/Signos/libra.svg',
+  'Escorpião': '/Signos/escorpiao.svg',
+  'Sagitário': '/Signos/sagitario.svg',
+  'Capricórnio': '/Signos/capricornio.svg',
+  'Aquário': '/Signos/aquario.svg',
+  'Peixes': '/Signos/peixes.svg',
+}
+
+export function getSignSvg(signName: string): string | null {
+  return SIGN_SVG_MAP[signName] ?? null
+}

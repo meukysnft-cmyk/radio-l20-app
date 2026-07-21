@@ -5,7 +5,10 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit as firestoreLimit,
   onSnapshot,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -19,6 +22,8 @@ type CollectionPath = FirestoreCollectionName | (string & {})
 export type FirestoreRecord<T> = T & {
   id: string
 }
+
+const DEFAULT_LIST_LIMIT = 200
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
@@ -35,9 +40,15 @@ function wrapFirestoreError(action: string, error: unknown): never {
 
 export async function listDocuments<T extends DocumentData>(
   collectionName: CollectionPath,
+  maxResults: number = DEFAULT_LIST_LIMIT,
 ): Promise<Array<FirestoreRecord<T>>> {
   try {
-    const snapshot = await getDocs(collection(db, collectionName))
+    const q = query(
+      collection(db, collectionName),
+      orderBy('createdAt', 'desc'),
+      firestoreLimit(maxResults),
+    )
+    const snapshot = await getDocs(q)
 
     return snapshot.docs.map((documentSnapshot) => ({
       id: documentSnapshot.id,
@@ -53,8 +64,14 @@ export function subscribeDocuments<T extends DocumentData>(
   onChange: (documents: Array<FirestoreRecord<T>>) => void,
   onError?: (error: unknown) => void,
 ) {
-  return onSnapshot(
+  const q = query(
     collection(db, collectionName),
+    orderBy('createdAt', 'desc'),
+    firestoreLimit(DEFAULT_LIST_LIMIT),
+  )
+
+  return onSnapshot(
+    q,
     (snapshot) => {
       onChange(
         snapshot.docs.map((documentSnapshot) => ({
@@ -69,7 +86,7 @@ export function subscribeDocuments<T extends DocumentData>(
         return
       }
 
-      wrapFirestoreError('NÃ£o foi possÃ­vel ouvir os documentos.', error)
+      wrapFirestoreError('Não foi possível ouvir os documentos.', error)
     },
   )
 }

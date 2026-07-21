@@ -11,11 +11,14 @@ import { LivePlayer } from '../components/LivePlayer'
 import { SectionSummaries, HoroscopeSummary } from '../components/SectionSummaries'
 import { SocialActions } from '../components/SocialLinks'
 import { SponsorBanner } from '../components/SponsorBanner'
+import { SkNewsPageLayout } from '../components/Skeleton'
 import { radioRoutes } from '../config/radioLinks'
+import { radioPrograms } from '../data/programsContent'
 import { getProgramLabelBySlug } from '../data/programsContent'
 import { subscribeDocuments } from '../services/firestoreService'
 import type { NewsDocument } from '../types/content'
 import { siteContent, type ContentCard } from '../data/siteContent'
+import { IoVideocam, IoBriefcase, IoStar, IoList } from 'react-icons/io5'
 
 const fallbackFeaturedNews: ContentCard = {
   category: 'Cidade',
@@ -25,7 +28,6 @@ const fallbackFeaturedNews: ContentCard = {
   meta: 'Pilar, AL',
   isTemporary: false,
 }
-
 
 function toNewsCard(item: NewsDocument) {
   return {
@@ -54,6 +56,24 @@ function formatNewsDate(value: unknown) {
     month: '2-digit',
     year: 'numeric',
   }).format(date)
+}
+
+function QuickLinkCard({ to, icon, eyebrow, title, description }: {
+  to: string
+  icon: React.ReactNode
+  eyebrow: string
+  title: string
+  description: string
+}) {
+  return (
+    <Link className="home-quick-card" to={to}>
+      <span className="home-quick-icon" aria-hidden="true">{icon}</span>
+      <p className="card-eyebrow">{eyebrow}</p>
+      <h3>{title}</h3>
+      <p>{description}</p>
+      <span className="home-quick-arrow">Ver mais →</span>
+    </Link>
+  )
 }
 
 export function HomePage() {
@@ -106,23 +126,23 @@ export function HomePage() {
     [newsItems],
   )
 
+  const topPrograms = useMemo(() => radioPrograms.slice(0, 4), [])
+
   return (
     <div className="home-page">
-      <section className="hero-section" id="ao-vivo" aria-labelledby="hero-title">
-        <div className="hero-copy">
-          <p className="live-kicker">
-            <span aria-hidden="true"></span>
-            {content.radio.hero.kicker}
-          </p>
-          <h1 id="hero-title">{content.radio.hero.title}</h1>
-          <p className="hero-lead">{content.radio.hero.lead}</p>
-          <SocialActions />
+      <section className="hero-split" id="ao-vivo" aria-labelledby="hero-title">
+        <div className="hero-cards-row">
+          <div className="hero-player-side">
+            <LivePlayer compact />
+          </div>
+
+          <div className="hero-horoscope-side">
+            <HoroscopeSummary premium />
+          </div>
         </div>
 
-        <LivePlayer compact />
+        <SocialActions className="hero-social-row" />
       </section>
-
-      <HoroscopeSummary />
 
       <section className="content-section" id="noticias">
         <div className="section-title-row">
@@ -149,6 +169,8 @@ export function HomePage() {
               ))}
             </div>
           </div>
+        ) : newsItems.length === 0 ? (
+          <SkNewsPageLayout />
         ) : (
           <div className="empty-state-card">
             <p className="card-eyebrow">Portal local</p>
@@ -188,6 +210,30 @@ export function HomePage() {
         </div>
       </section>
 
+      <section className="content-section" id="programas-home">
+        <div className="section-title-row">
+          <SectionHeader
+            eyebrow={content.sections.programs.eyebrow}
+            title={content.sections.programs.title}
+            description={content.sections.programs.description}
+          />
+          <Link className="section-link" to={radioRoutes.programs}>
+            Ver programação
+          </Link>
+        </div>
+        <div className="home-quick-grid">
+          {topPrograms.map((p) => (
+            <Link className="home-program-mini" key={p.slug} to={`${radioRoutes.programDetail(p.slug)}`}>
+              <span className="home-program-mini-icon" aria-hidden="true">🎙</span>
+              <div>
+                <strong>{p.name}</strong>
+                <small>{p.time || p.days || ''}</small>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <section className="content-section schedule-section" id="agenda">
         <div className="section-title-row">
           <SectionHeader
@@ -208,6 +254,39 @@ export function HomePage() {
       </section>
 
       <SponsorBanner className="sponsor-strip-scroll" />
+
+      <section className="content-section" id="extras-home">
+        <div className="section-title-row">
+          <SectionHeader
+            eyebrow="Mais para você"
+            title="Explore a Rádio L20"
+            description="Vagas de emprego, horóscopo do dia, vídeos e muito mais conteúdo local."
+          />
+        </div>
+        <div className="home-quick-grid home-quick-grid-3">
+          <QuickLinkCard
+            to={radioRoutes.horoscope}
+            icon={<IoStar />}
+            eyebrow={content.sections.wordOfLife.eyebrow}
+            title="Horóscopo do dia"
+            description="Veja a previsão do seu signo com mensagens personalizadas."
+          />
+          <QuickLinkCard
+            to={radioRoutes.videos}
+            icon={<IoVideocam />}
+            eyebrow={content.sections.videos.eyebrow}
+            title={content.sections.videos.title}
+            description={content.sections.videos.description}
+          />
+          <QuickLinkCard
+            to={radioRoutes.jobs}
+            icon={<IoBriefcase />}
+            eyebrow={content.sections.jobs.eyebrow}
+            title={content.sections.jobs.title}
+            description={content.sections.jobs.description}
+          />
+        </div>
+      </section>
 
       <section className="content-section home-cta-grid">
         <article className="home-cta-card">
@@ -244,4 +323,3 @@ export function HomePage() {
     </div>
   )
 }
-

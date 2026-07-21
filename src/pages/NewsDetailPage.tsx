@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { radioRoutes } from '../config/radioLinks'
 import { radioPrograms } from '../data/programsContent'
-import { subscribeDocuments } from '../services/firestoreService'
+import { getDocument, listDocuments } from '../services/firestoreService'
+import { SkPageHeader, SkCard, SkLine, Sk, SkNewsCard } from '../components/Skeleton'
 import type { NewsDocument } from '../types/content'
 
 function formatNewsDate(value: unknown) {
@@ -22,24 +23,30 @@ function formatNewsDate(value: unknown) {
 
 export function NewsDetailPage() {
   const { id } = useParams()
-  const [newsItems, setNewsItems] = useState<Array<NewsDocument & { id: string }>>([])
+  const [news, setNews] = useState<(NewsDocument & { id: string }) | null>(null)
+  const [related, setRelated] = useState<Array<NewsDocument & { id: string }>>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    return subscribeDocuments<NewsDocument>('news', (documents) => {
-      setNewsItems(documents)
-      setIsLoading(false)
-    })
-  }, [])
+    if (!id) return
+    let cancelled = false
 
-  const news = useMemo(() => newsItems.find((item) => item.id === id) ?? null, [id, newsItems])
-  const related = useMemo(
-    () =>
-      news
-        ? newsItems.filter((item) => item.id !== news.id && item.programSlug === news.programSlug).slice(0, 3)
-        : [],
-    [news, newsItems],
-  )
+    async function load() {
+      const doc = await getDocument<NewsDocument>('news', id!)
+      if (cancelled) return
+      setNews(doc)
+      if (doc?.programSlug) {
+        const all = await listDocuments<NewsDocument>('news')
+        if (cancelled) return
+        setRelated(all.filter((item) => item.id !== doc.id && item.programSlug === doc.programSlug).slice(0, 3))
+      }
+      setIsLoading(false)
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [id])
+
   const programName = useMemo(
     () => radioPrograms.find((program) => program.slug === news?.programSlug)?.name || 'Rádio L20',
     [news?.programSlug],
@@ -52,8 +59,25 @@ export function NewsDetailPage() {
   if (isLoading) {
     return (
       <section className="content-section page-section news-detail-page">
-        <div className="route-loading-shell" aria-live="polite">
-          Carregando notícia...
+        <SkPageHeader />
+        <SkCard style={{ marginTop: 20 }}>
+          <Sk width="100%" height="320px" radius="var(--radius-lg)" style={{ marginBottom: 16 }} />
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+            <Sk width="80px" height="24px" radius="var(--radius-pill)" />
+            <Sk width="100px" height="24px" radius="var(--radius-pill)" />
+            <Sk width="90px" height="24px" radius="var(--radius-pill)" />
+          </div>
+          <SkLine width="100%" height="0.9rem" style={{ marginBottom: 6 }} />
+          <SkLine width="95%" height="0.9rem" style={{ marginBottom: 6 }} />
+          <SkLine width="88%" height="0.9rem" style={{ marginBottom: 6 }} />
+          <SkLine width="70%" height="0.9rem" />
+        </SkCard>
+        <div style={{ display: 'grid', gap: 16, marginTop: 24 }}>
+          <SkLine width="180px" height="1.3rem" />
+          <div className="news-list">
+            <SkNewsCard />
+            <SkNewsCard />
+          </div>
         </div>
       </section>
     )

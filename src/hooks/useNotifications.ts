@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { collection, addDoc, getDocs, query, where, writeBatch } from 'firebase/firestore'
 import { getToken, onMessage } from 'firebase/messaging'
 import { db, getMessagingInstance } from '../lib/firebase'
@@ -11,8 +11,6 @@ export function useNotifications() {
   const [permission, setPermission] = useState<NotificationPermission>('default')
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [lastMessage, setLastMessage] = useState<{ title: string; body: string; url?: string } | null>(null)
-  const lastMessageRef = useRef(lastMessage)
-  lastMessageRef.current = lastMessage
 
   useEffect(() => {
     if (!('Notification' in window)) {
@@ -29,11 +27,12 @@ export function useNotifications() {
     }
 
     let cancelled = false
+    let unsubscribeMessage: (() => void) | undefined
 
     getMessagingInstance().then((messaging) => {
       if (cancelled || !messaging) return
 
-      onMessage(messaging, (payload) => {
+      unsubscribeMessage = onMessage(messaging, (payload) => {
         const data = payload.data || {}
         const title = payload.notification?.title || data.title || 'Rádio L20'
         const body = payload.notification?.body || data.body || ''
@@ -53,60 +52,75 @@ export function useNotifications() {
       })
     })
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+      unsubscribeMessage?.()
+    }
   }, [permission, user])
 
   const saveToken = useCallback(async (token: string) => {
     if (!user) return
 
-    const tokensRef = collection(db, 'notificationTokens')
-    const existing = await getDocs(query(tokensRef, where('uid', '==', user.uid)))
+    try {
+      const tokensRef = collection(db, 'notificationTokens')
+      const existing = await getDocs(query(tokensRef, where('uid', '==', user.uid)))
 
-    if (!existing.empty) {
-      const batch = writeBatch(db)
-      existing.docs.forEach((d) => {
-        batch.update(d.ref, { token, active: true, updatedAt: new Date() })
-      })
-      await batch.commit()
-    } else {
-      await addDoc(tokensRef, {
-        token,
-        uid: user.uid,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      if (!existing.empty) {
+        const batch = writeBatch(db)
+        existing.docs.forEach((d) => {
+          batch.update(d.ref, { token, active: true, updatedAt: new Date() })
+        })
+        await batch.commit()
+      } else {
+        await addDoc(tokensRef, {
+          token,
+          uid: user.uid,
+          active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+      }
+    } catch (err) {
+      console.error('Erro ao salvar token de notificação:', err)
     }
   }, [user])
 
   const subscribe = useCallback(async () => {
-    const messaging = await getMessagingInstance()
-    if (!messaging) return
+    try {
+      const messaging = await getMessagingInstance()
+      if (!messaging) return
 
-    const token = await getToken(messaging, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY || undefined,
-    })
+      const token = await getToken(messaging, {
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY || undefined,
+      })
 
-    if (token) {
-      setIsSubscribed(true)
-      setPermission('granted')
-      await saveToken(token)
+      if (token) {
+        setIsSubscribed(true)
+        setPermission('granted')
+        await saveToken(token)
+      }
+    } catch (err) {
+      console.error('Erro ao inscrever notificações:', err)
     }
   }, [saveToken])
 
   const unsubscribe = useCallback(async () => {
     if (!user) return
 
-    const tokensRef = collection(db, 'notificationTokens')
-    const existing = await getDocs(query(tokensRef, where('uid', '==', user.uid)))
+    try {
+      const tokensRef = collection(db, 'notificationTokens')
+      const existing = await getDocs(query(tokensRef, where('uid', '==', user.uid)))
 
-    const batch = writeBatch(db)
-    existing.docs.forEach((d) => {
-      batch.update(d.ref, { active: false, updatedAt: new Date() })
-    })
-    await batch.commit()
+      const batch = writeBatch(db)
+      existing.docs.forEach((d) => {
+        batch.update(d.ref, { active: false, updatedAt: new Date() })
+      })
+      await batch.commit()
 
-    setIsSubscribed(false)
+      setIsSubscribed(false)
+    } catch (err) {
+      console.error('Erro ao cancelar inscrição de notificações:', err)
+    }
   }, [user])
 
   const dismissMessage = useCallback(() => {

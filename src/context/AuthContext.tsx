@@ -1,5 +1,5 @@
 import { getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut as firebaseSignOut } from 'firebase/auth'
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { auth, googleAuthProvider } from '../lib/firebase'
 import { getAdminAccess } from '../services/adminAccessService'
 import { AuthContext } from './authState'
@@ -13,8 +13,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [adminRole, setAdminRole] = useState<string | null>(null)
   const [adminLoading, setAdminLoading] = useState(false)
   const [authError, setAuthError] = useState('')
+  const adminCheckIdRef = useRef(0)
 
   const refreshAdminAccess = useCallback(async (uid?: string) => {
     const userId = uid || auth.currentUser?.uid
@@ -24,11 +26,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false
     }
 
+    const checkId = ++adminCheckIdRef.current
     setAdminLoading(true)
     setAuthError('')
 
     try {
       const result = await getAdminAccess(userId)
+
+      if (checkId !== adminCheckIdRef.current) return false
+
       const finalIsAdmin = result.isAdmin
 
       if (import.meta.env.DEV) {
@@ -42,10 +48,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setIsAdmin(finalIsAdmin)
+      setAdminRole(result.data?.role ?? null)
       return finalIsAdmin
     } catch (error) {
+      if (checkId !== adminCheckIdRef.current) return false
+
       console.error('Falha ao validar administrador.', error)
       setIsAdmin(false)
+      setAdminRole(null)
       setAuthError('Não foi possível verificar a permissão de administrador.')
       if (import.meta.env.DEV) {
         console.debug('[Rádio L20 Admin]', {
@@ -59,7 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return false
     } finally {
-      setAdminLoading(false)
+      if (checkId === adminCheckIdRef.current) {
+        setAdminLoading(false)
+      }
     }
   }, [])
 
@@ -86,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await refreshAdminAccess(currentUser.uid)
           } else {
             setIsAdmin(false)
+            setAdminRole(null)
             setAuthError('')
           }
 
@@ -110,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     await firebaseSignOut(auth)
     setIsAdmin(false)
+    setAdminRole(null)
     setAuthError('')
   }, [])
 
@@ -119,13 +133,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       isLoading: loading,
       isAdmin,
+      adminRole,
       adminLoading,
       authError,
       loginWithGoogle,
       logout,
       refreshAdminAccess,
     }),
-    [adminLoading, authError, isAdmin, loading, loginWithGoogle, logout, refreshAdminAccess, user],
+    [adminLoading, adminRole, authError, isAdmin, loading, loginWithGoogle, logout, refreshAdminAccess, user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { LiveIndicator } from '../components/LiveIndicator'
 import { useAudioPlayer } from '../context/useAudioPlayer'
-import { subscribeDocuments, listDocuments } from '../services/firestoreService'
-import type { LiveStreamDocument, ProgramDocument, LinksDocument, PlayerDocument } from '../types/content'
+import { useLiveStatus } from '../context/useLiveStatus'
+import { listDocuments } from '../services/firestoreService'
+import type { LinksDocument, LiveStreamDocument, ProgramDocument, PlayerDocument } from '../types/content'
 
 function formatDate(dateStr: string, timeStr?: string): string {
   if (!dateStr) return ''
@@ -314,10 +315,8 @@ function GenericLiveCard({ player }: { player: PlayerDocument }) {
 
 export function LivePage() {
   useAudioPlayer()
-  const [programs, setPrograms] = useState<Array<ProgramDocument & { id: string }>>([])
-  const [liveStreams, setLiveStreams] = useState<Array<LiveStreamDocument & { id: string }>>([])
+  const { player, programs, liveStreams } = useLiveStatus()
   const [, setLinks] = useState<LinksDocument | null>(null)
-  const [player, setPlayer] = useState<PlayerDocument | null>(null)
 
   const currentProgram = useMemo(() => programs.find((p) => p.isOnAir) || null, [programs])
   const livePrograms = useMemo(() => programs.filter((p) => p.liveStatus === 'live'), [programs])
@@ -338,27 +337,9 @@ export function LivePage() {
   const hasAnyLive = isRadioLive || livePrograms.length > 0 || liveStreamItems.length > 0 || showGenericLiveCard
 
   useEffect(() => {
-    const unsubPrograms = subscribeDocuments<ProgramDocument>('programs', (docs) => {
-      setPrograms(docs)
-    })
-
-    const unsubStreams = subscribeDocuments<LiveStreamDocument>('liveStreams', (docs) => {
-      setLiveStreams(docs)
-    })
-
-    const unsubPlayer = subscribeDocuments<PlayerDocument>('player', (docs) => {
-      if (docs.length > 0) setPlayer(docs[0])
-    })
-
     listDocuments<LinksDocument>('links').then((doc) => {
       if (doc.length > 0) setLinks(doc[0])
     })
-
-    return () => {
-      unsubPrograms()
-      unsubStreams()
-      unsubPlayer()
-    }
   }, [])
 
   const allLiveCount = livePrograms.length + liveStreamItems.length

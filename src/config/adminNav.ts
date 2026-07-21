@@ -17,6 +17,7 @@ import {
   IoBriefcaseOutline,
   IoSparklesOutline,
   IoBarChartOutline,
+  IoChatbubblesOutline,
 } from 'react-icons/io5'
 import type { ComponentType } from 'react'
 
@@ -44,6 +45,7 @@ export const adminNavItems: AdminNavItem[] = [
   { key: 'gallery', label: 'Galeria de Fotos', path: '/admin/galeria', icon: IoImagesOutline, group: 'engajamento' },
   { key: 'links', label: 'Links Úteis', path: '/admin/links', icon: IoLinkOutline, group: 'engajamento' },
   { key: 'social', label: 'Redes Sociais', path: '/admin/redes-sociais', icon: IoGlobeOutline, group: 'engajamento' },
+  { key: 'chat', label: 'Chat', path: '/admin/chat', icon: IoChatbubblesOutline, group: 'engajamento' },
   { key: 'appearance', label: 'Aparência', path: '/admin/aparencia', icon: IoColorPaletteOutline, group: 'sistema' },
   { key: 'settings', label: 'Configurações', path: '/admin/configuracoes', icon: IoSettingsOutline, group: 'sistema' },
   { key: 'users', label: 'Usuários', path: '/admin/usuarios', icon: IoPeopleOutline, group: 'sistema' },

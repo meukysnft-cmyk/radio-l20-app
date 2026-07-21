@@ -1,13 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { FaCalendarAlt, FaEnvelope, FaFutbol, FaHome, FaLock, FaListUl, FaMicrophone, FaNewspaper, FaSignInAlt, FaStar, FaSuitcase, FaUser, FaVideo } from 'react-icons/fa'
+import { useEffect, useMemo, useRef } from 'react'
+import { FaCalendarAlt, FaEnvelope, FaLock, FaSignInAlt, FaStar, FaSuitcase, FaUser, FaVideo } from 'react-icons/fa'
 import { NavLink } from 'react-router-dom'
 import { radioRoutes } from '../config/radioLinks'
 import { useAuth } from '../context/useAuth'
+import { useLiveStatus } from '../context/useLiveStatus'
 import { useTheme } from '../context/useTheme'
-import { subscribeDocuments } from '../services/firestoreService'
 import { hasCommunityAccess } from '../routes/RequireCommunityAccess'
 import { Logo } from './Logo'
-import type { PlayerDocument, ProgramDocument, LiveStreamDocument } from '../types/content'
 
 type SidenavProps = {
   onClose: () => void
@@ -18,31 +17,7 @@ export function Sidenav({ onClose, variant = 'mobile' }: SidenavProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
   const { isAdmin, user, logout, loginWithGoogle } = useAuth()
   const { theme, toggleTheme } = useTheme()
-  const [player, setPlayer] = useState<PlayerDocument | null>(null)
-  const [programs, setPrograms] = useState<Array<ProgramDocument & { id: string }>>([])
-  const [liveStreams, setLiveStreams] = useState<Array<LiveStreamDocument & { id: string }>>([])
-
-  useEffect(() => {
-    const unsubPlayer = subscribeDocuments<PlayerDocument>('player', (docs) => {
-      if (docs.length > 0) setPlayer(docs[0])
-    })
-    const unsubPrograms = subscribeDocuments<ProgramDocument>('programs', (docs) => {
-      setPrograms(docs)
-    })
-    const unsubStreams = subscribeDocuments<LiveStreamDocument>('liveStreams', (docs) => {
-      setLiveStreams(docs)
-    })
-    return () => { unsubPlayer(); unsubPrograms(); unsubStreams() }
-  }, [])
-
-  const isLive = useMemo(() => {
-    if (player?.isLive) return true
-    if (player?.youtubeIsLive && !!player?.youtubeLiveUrl) return true
-    if (player?.instagramIsLive && !!player?.instagramLiveUrl) return true
-    if (programs.some((p) => p.liveStatus === 'live')) return true
-    if (liveStreams.some((s) => s.status === 'live')) return true
-    return false
-  }, [player, programs, liveStreams])
+  const { isLive } = useLiveStatus()
 
   useEffect(() => {
     if (variant === 'mobile') {
@@ -64,12 +39,7 @@ export function Sidenav({ onClose, variant = 'mobile' }: SidenavProps) {
   const navItems = useMemo(
     () =>
       [
-        { label: 'Início', to: radioRoutes.home, icon: <FaHome /> },
-        { label: 'Ao Vivo', to: radioRoutes.live, icon: <FaMicrophone /> },
-        { label: 'Notícias', to: radioRoutes.news, icon: <FaNewspaper /> },
-        { label: 'Esportes', to: radioRoutes.sport, icon: <FaFutbol /> },
         { label: 'Agenda', to: radioRoutes.schedule, icon: <FaCalendarAlt /> },
-        { label: 'Programas', to: radioRoutes.programs, icon: <FaListUl /> },
         { label: 'Vídeos', to: radioRoutes.videos, icon: <FaVideo /> },
         { label: 'Horóscopo', to: radioRoutes.horoscope, icon: <FaStar /> },
         { label: 'Empregos', to: radioRoutes.jobs, icon: <FaSuitcase /> },
