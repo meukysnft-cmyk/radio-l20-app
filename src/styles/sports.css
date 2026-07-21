@@ -116,39 +116,27 @@
 .ft-match-meta { display: flex; gap: 10px; font-size: .72rem; color: var(--text-muted); justify-content: center; }
 .ft-match-status { color: var(--error); font-weight: 700; }
 
-/* ── Libertadores Bracket ── */
-.lb-wrap{overflow-x:auto;padding:4px 0}
-.lb-grid{display:grid;gap:0;min-width:700px}
-.lb-col-title{font-size:.85rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.5px;padding:8px 14px;background:var(--surface-deep);border-radius:6px 6px 0 0;text-align:center;border-bottom:1px solid var(--line)}
-.lb-node{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;display:flex;align-items:center}
-.lb-node-played{border-color:var(--brand)}
-.lb-node-empty{background:transparent;border:1px dashed var(--line);justify-content:center;color:var(--text-muted);font-size:.78rem}
-.lb-node-inner{text-align:center;width:100%}
-.lb-inner{width:100%;display:grid;gap:4px}
-.lb-game{display:grid;grid-template-columns:56px 24px 1fr 26px 10px 26px 1fr 24px;gap:4px;align-items:center;line-height:1.5;padding:4px 0}
-.lb-game+.lb-game{border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
-.lb-gdate{font-size:.8rem;color:var(--text-muted);text-align:left;white-space:nowrap}
-.lb-glogo{width:22px;height:22px;object-fit:contain}
-.lb-gteam{font-size:.82rem;color:var(--text);white-space:nowrap}
-.lb-gteam-bold{font-weight:700;color:var(--text-strong)}
-.lb-gscore{font-size:.8rem;color:var(--text);text-align:center;font-weight:600}
-.lb-gscore-bold{font-weight:800;color:var(--text-strong)}
-.lb-gx{font-size:.68rem;color:var(--text-muted);text-align:center}
-.lb-agg{font-size:.72rem;color:var(--brand-bright);text-align:center;font-weight:600;margin-top:3px;letter-spacing:.3px}
-.lb-conn{position:relative;border-right:3px solid var(--brand)}
-.lb-conn::before,.lb-conn::after{content:'';position:absolute;left:0;width:50%;height:3px;background:var(--brand)}
-.lb-conn::before{top:33%}
-.lb-conn::after{top:66%}
-
-@media (max-width:640px){
-  .lb-game{grid-template-columns:44px 18px 1fr 20px 6px 20px 1fr 18px}
-  .lb-glogo{width:18px;height:18px}
-  .lb-gteam{font-size:.72rem}
-  .lb-gscore{font-size:.72rem}
-  .lb-gdate{font-size:.68rem}
-  .lb-node{padding:6px 8px}
-  .lb-col-title{font-size:.72rem}
-}
+/* ── Libertadores Round-by-round ── */
+.lb-round{display:grid;gap:0}
+.lb-round-title{font-size:1rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.5px;margin:0 0 14px;text-align:center}
+.lb-round-list{display:grid;gap:14px}
+.lb-matchup{border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface);overflow:hidden}
+.lb-matchup-played{border-color:var(--brand)}
+.lb-matchup-label{padding:6px 14px;font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;background:var(--surface-deep);border-bottom:1px solid var(--line)}
+.lb-matchup-body{display:grid;gap:2px;padding:10px 14px 12px}
+.lb-leg{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center;padding:6px 0}
+.lb-leg+.lb-leg{border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.lb-leg-date{font-size:.8rem;color:var(--text-muted);white-space:nowrap;min-width:56px}
+.lb-leg-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:6px 12px;align-items:center}
+.lb-leg-row{display:flex;align-items:center;gap:8px}
+.lb-leg-row-right{justify-content:flex-end}
+.lb-leg-logo{width:26px;height:26px;object-fit:contain;flex-shrink:0}
+.lb-leg-name{font-size:.9rem;color:var(--text);font-weight:600}
+.lb-leg-name-bold{font-weight:800;color:var(--text-strong)}
+.lb-leg-score{font-size:1rem;color:var(--text);font-weight:700;text-align:center;white-space:nowrap}
+.lb-leg-score-bold{font-weight:800;color:var(--text-strong)}
+.lb-leg-x{font-size:.75rem;color:var(--text-muted);margin:0 3px}
+.lb-agg{font-size:.78rem;color:var(--brand-bright);text-align:center;font-weight:600;padding-top:6px;letter-spacing:.3px}
 
 /* ── Artilharia ── */
 .art-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface)}

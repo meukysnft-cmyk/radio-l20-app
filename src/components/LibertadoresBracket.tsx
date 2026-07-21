@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { MatchChave, LeagueTable } from '../types/content'
 
 type PairedMatch = {
@@ -47,154 +47,112 @@ function pairMatches(chaves: MatchChave[]): PairedMatch[] {
   return pairs
 }
 
-function getRoundNames(total: number): string[] {
-  if (total <= 1) return ['Final']
-  if (total <= 2) return ['Semifinais', 'Final']
-  if (total <= 4) return ['Quartas', 'Semifinais', 'Final']
-  return ['Oitavas', 'Quartas', 'Semifinais', 'Final']
-}
-
-function getNextRoundSlots(prevCount: number): number {
-  return Math.ceil(prevCount / 2)
-}
-
 function fmtDate(d: string): string {
   if (!d) return ''
   return new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 
+const ROUND_LABELS = ['Oitavas', 'Quartas', 'Semifinais', 'Final']
+
+function getRoundLimit(label: string): number {
+  if (label === 'Oitavas') return 8
+  if (label === 'Quartas') return 4
+  if (label === 'Semifinais') return 2
+  return 1
+}
+
 export function LibertadoresBracket({ data }: { data: LeagueTable }) {
-  const rounds = useMemo(() => {
+  const allPairs = useMemo(() => {
     if (!data.matches?.chaves) return null
     const pairs = pairMatches(data.matches.chaves)
-    if (pairs.length === 0) return null
-    const roundNames = getRoundNames(pairs.length)
-    const arr: { name: string; pairs: (PairedMatch | null)[] }[] = []
-    let remaining = [...pairs]
-    for (const name of roundNames) {
-      const count = remaining.length
-      const nextCount = getNextRoundSlots(count)
-      const rPairs = name === roundNames[0] ? remaining : Array.from({ length: nextCount }, () => null)
-      arr.push({ name, pairs: rPairs })
-      if (name !== roundNames[0]) break
-      remaining = Array.from({ length: nextCount }, () => null)
-    }
-    return arr
+    return pairs.length ? pairs : null
   }, [data.matches])
 
-  if (!rounds || rounds.length === 0) {
+  const [tab, setTab] = useState(0)
+
+  if (!allPairs) {
     return <p className="ft-na" style={{ textAlign: 'center', padding: 24 }}>Dados do chaveamento indisponíveis no momento.</p>
   }
 
-  const firstCount = rounds[0].pairs.length
-  const totalRows = firstCount * 3
-
-  function gRow(i: number) { return i * 3 + 2 }
-  function colGrid(col: number) { return col }
-
-  let gridCols = '0px'
-  for (let ri = 0; ri < rounds.length; ri++) {
-    gridCols += ' 1fr'
-    if (ri < rounds.length - 1) gridCols += ' 28px'
-  }
+  const roundLimit = getRoundLimit(ROUND_LABELS[tab])
+  const shown = allPairs.slice(0, roundLimit)
+  const roundName = ROUND_LABELS[tab]
 
   return (
-    <div className="lb-wrap">
-      <div
-        className="lb-grid"
-        style={{
-          gridTemplateColumns: gridCols,
-          gridTemplateRows: `auto repeat(${totalRows}, auto)`,
-        }}
-      >
-        {rounds.map((r, ri) => (
-          <div
-            key={r.name}
-            className="lb-col-title"
-            style={{ gridColumn: colGrid(ri * 2 + 2), gridRow: 1 }}
+    <div>
+      <div className="ft-tabs" style={{ marginBottom: 18 }}>
+        {ROUND_LABELS.map((name, i) => (
+          <button
+            key={name}
+            className={`ft-tab${i === tab ? ' is-active' : ''}`}
+            onClick={() => setTab(i)}
+            type="button"
+            disabled={i > 0 && allPairs.length < getRoundLimit(ROUND_LABELS[i - 1])}
+            style={{ fontSize: '.85rem', padding: '8px 18px' }}
           >
-            {r.name}
-          </div>
+            {name}
+          </button>
         ))}
-
-        {rounds.map((r, ri) =>
-          r.pairs.map((pair, pi) => {
-            if (!pair) {
-              const row = gRow(pi)
-              const span = ri === 0 ? 3 : (firstCount / Math.pow(2, ri)) * 1.5
-              return (
-                <div
-                  key={`${ri}-${pi}`}
-                  className="lb-node lb-node-empty"
-                  style={{ gridColumn: colGrid(ri * 2 + 2), gridRow: `${row} / span ${span}` }}
-                >
-                  <div className="lb-node-inner"><span>A definir</span></div>
-                </div>
-              )
-            }
-
-            const row = gRow(pi)
-            const span = ri === 0 ? 3 : (firstCount / Math.pow(2, ri)) * 1.5
+      </div>
+      <div className="lb-round">
+        <h3 className="lb-round-title">{roundName}</h3>
+        <div className="lb-round-list">
+          {shown.map((pair, pi) => {
             const played = pair.leg1.played && pair.leg2.played
             const h1s = pair.leg1.homeScore != null ? pair.leg1.homeScore : '-'
             const a1s = pair.leg1.awayScore != null ? pair.leg1.awayScore : '-'
             const h2s = pair.leg2.homeScore != null ? pair.leg2.homeScore : '-'
             const a2s = pair.leg2.awayScore != null ? pair.leg2.awayScore : '-'
-
             return (
-              <div
-                key={`${ri}-${pi}`}
-                className={`lb-node${played ? ' lb-node-played' : ''}`}
-                style={{ gridColumn: colGrid(ri * 2 + 2), gridRow: `${row} / span ${span}` }}
-              >
-                <div className="lb-inner">
-                  <div className="lb-game">
-                    <span className="lb-gdate">{fmtDate(pair.leg1.date)}</span>
-                    <img src={pair.leg1.homeLogo} alt="" className="lb-glogo" />
-                    <span className="lb-gteam">{pair.leg1.home}</span>
-                    <span className="lb-gscore">{h1s}</span>
-                    <span className="lb-gx">&times;</span>
-                    <span className="lb-gscore">{a1s}</span>
-                    <span className="lb-gteam">{pair.leg1.away}</span>
-                    <img src={pair.leg1.awayLogo} alt="" className="lb-glogo" />
+              <div key={pi} className={`lb-matchup${played ? ' lb-matchup-played' : ''}`}>
+                <div className="lb-matchup-label">Confronto {pi + 1}</div>
+                <div className="lb-matchup-body">
+                  <div className="lb-leg">
+                    <span className="lb-leg-date">{fmtDate(pair.leg1.date)}</span>
+                    <div className="lb-leg-teams">
+                      <div className="lb-leg-row">
+                        <img src={pair.leg1.homeLogo} alt="" className="lb-leg-logo" />
+                        <span className="lb-leg-name">{pair.leg1.home}</span>
+                      </div>
+                      <div className="lb-leg-score">
+                        {h1s}
+                        <span className="lb-leg-x">&times;</span>
+                        {a1s}
+                      </div>
+                      <div className="lb-leg-row lb-leg-row-right">
+                        <span className="lb-leg-name">{pair.leg1.away}</span>
+                        <img src={pair.leg1.awayLogo} alt="" className="lb-leg-logo" />
+                      </div>
+                    </div>
                   </div>
-                  <div className="lb-game">
-                    <span className="lb-gdate">{fmtDate(pair.leg2.date)}</span>
-                    <img src={pair.leg2.homeLogo} alt="" className="lb-glogo" />
-                    <span className="lb-gteam lb-gteam-bold">{pair.leg2.home}</span>
-                    <span className="lb-gscore lb-gscore-bold">{h2s}</span>
-                    <span className="lb-gx">&times;</span>
-                    <span className="lb-gscore lb-gscore-bold">{a2s}</span>
-                    <span className="lb-gteam lb-gteam-bold">{pair.leg2.away}</span>
-                    <img src={pair.leg2.awayLogo} alt="" className="lb-glogo" />
+                  <div className="lb-leg">
+                    <span className="lb-leg-date">{fmtDate(pair.leg2.date)}</span>
+                    <div className="lb-leg-teams">
+                      <div className="lb-leg-row">
+                        <img src={pair.leg2.homeLogo} alt="" className="lb-leg-logo" />
+                        <span className="lb-leg-name lb-leg-name-bold">{pair.leg2.home}</span>
+                      </div>
+                      <div className="lb-leg-score lb-leg-score-bold">
+                        {h2s}
+                        <span className="lb-leg-x">&times;</span>
+                        {a2s}
+                      </div>
+                      <div className="lb-leg-row lb-leg-row-right">
+                        <span className="lb-leg-name lb-leg-name-bold">{pair.leg2.away}</span>
+                        <img src={pair.leg2.awayLogo} alt="" className="lb-leg-logo" />
+                      </div>
+                    </div>
                   </div>
                   {played && pair.aggregateHome != null && pair.aggregateAway != null && (
-                    <div className="lb-agg">Agr: {pair.aggregateHome}&times;{pair.aggregateAway}</div>
+                    <div className="lb-agg">
+                      Agregado: {pair.aggregateHome}&times;{pair.aggregateAway}
+                    </div>
                   )}
                 </div>
               </div>
             )
-          })
-        )}
-
-        {rounds.slice(0, -1).map((r, ri) => {
-          const nextPairs = rounds[ri + 1]?.pairs ?? []
-          return nextPairs.map((_, npi) => {
-            const prevStart = npi * 2
-            const rowStart = gRow(prevStart)
-            const span = (firstCount / Math.pow(2, ri + 1)) * 3
-            return (
-              <div
-                key={`conn-${ri}-${npi}`}
-                className="lb-conn"
-                style={{
-                  gridColumn: colGrid(ri * 2 + 3),
-                  gridRow: `${rowStart} / span ${span}`,
-                }}
-              />
-            )
-          })
-        })}
+          })}
+        </div>
       </div>
     </div>
   )
