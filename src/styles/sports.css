@@ -140,24 +140,24 @@
 
 /* ── Artilharia ── */
 .art-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface)}
-.art-header{display:grid;grid-template-columns:32px 1fr 90px 120px 50px;gap:4px;align-items:center;padding:8px 12px;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);background:var(--surface-deep);border-bottom:1px solid var(--line)}
-.art-row{display:grid;grid-template-columns:32px 1fr 90px 120px 50px;gap:4px;align-items:center;padding:8px 12px;font-size:.78rem;border-bottom:1px solid var(--line);transition:background .1s}
+.art-header{display:grid;grid-template-columns:40px 1fr 110px 150px 60px;gap:6px;align-items:center;padding:10px 16px;font-size:.82rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);background:var(--surface-deep);border-bottom:1px solid var(--line)}
+.art-row{display:grid;grid-template-columns:40px 1fr 110px 150px 60px;gap:6px;align-items:center;padding:10px 16px;font-size:.88rem;border-bottom:1px solid var(--line);transition:background .1s}
 .art-row:last-child{border-bottom:none}
 .art-row:hover{background:var(--brand-tint)}
-.art-rank{text-align:center;font-weight:700;color:var(--text-muted);font-size:.72rem}
-.art-player{display:flex;align-items:center;gap:8px;color:var(--text-strong);font-weight:600}
-.art-photo{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0}
-.art-pos{color:var(--text-secondary);font-size:.72rem}
-.art-team-cell{display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:.72rem}
-.art-logo{width:16px;height:16px;object-fit:contain;flex-shrink:0}
-.art-gols{text-align:center;font-weight:800;color:var(--brand-bright);font-size:.85rem}
+.art-rank{text-align:center;font-weight:700;color:var(--text-muted);font-size:.82rem}
+.art-player{display:flex;align-items:center;gap:10px;color:var(--text-strong);font-weight:600}
+.art-photo{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.art-pos{color:var(--text-secondary);font-size:.82rem}
+.art-team-cell{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:.82rem}
+.art-logo{width:20px;height:20px;object-fit:contain;flex-shrink:0}
+.art-gols{text-align:center;font-weight:800;color:var(--brand-bright);font-size:.95rem}
 
 @media (max-width:640px){
-  .art-header,.art-row{grid-template-columns:28px 1fr 70px 80px 36px;font-size:.7rem}
-  .art-photo{width:22px;height:22px}
-  .art-pos{font-size:.65rem}
-  .art-team-cell{font-size:.65rem}
-  .art-gols{font-size:.78rem}
+  .art-header,.art-row{grid-template-columns:30px 1fr 80px 100px 44px;font-size:.78rem;padding:8px 12px}
+  .art-photo{width:26px;height:26px}
+  .art-pos{font-size:.74rem}
+  .art-team-cell{font-size:.74rem}
+  .art-gols{font-size:.85rem}
 }
 
 .ft-card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -180,11 +180,12 @@
 .ft-grupo-title { margin: 0 0 8px; font-size: 1rem; font-weight: 800; color: var(--brand-bright); text-transform: uppercase; letter-spacing: .03em; }
 .ft-table-lg { }
 .ft-table-lg .ft-table-header,
-.ft-table-lg .ft-row { grid-template-columns: 36px 1fr repeat(8, 40px); font-size: .85rem; padding: 10px 14px; }
+.ft-table-lg .ft-row { grid-template-columns: 36px 1fr repeat(6, 40px); font-size: .85rem; padding: 10px 14px; }
 .ft-table-lg .ft-pos { font-size: .78rem; }
-.ft-table-lg .ft-team { font-size: .88rem; font-weight: 600; }
+.ft-table-lg .ft-team { font-size: .88rem; font-weight: 600; overflow: visible; text-overflow: clip; white-space: normal; }
 .ft-table-lg .ft-stat { font-size: .85rem; }
 .ft-table-lg .ft-stat-bold { font-size: .9rem; }
+.ft-table-lg .ft-team { display: flex; align-items: center; gap: 8px; }
 .ft-logo { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; border-radius: 4px; display: inline-block; vertical-align: middle; }
 .ft-logo-fallback { display: inline-flex; align-items: center; justify-content: center; background: var(--surface-deep); border: 1px solid var(--line); font-size: .6rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
 .ft-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }

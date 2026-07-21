@@ -52,14 +52,12 @@ function fmtDate(d: string): string {
   return new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 
-const ROUND_LABELS = ['Oitavas', 'Quartas', 'Semifinais', 'Final']
-
-function getRoundLimit(label: string): number {
-  if (label === 'Oitavas') return 8
-  if (label === 'Quartas') return 4
-  if (label === 'Semifinais') return 2
-  return 1
-}
+const ROUNDS = [
+  { label: 'Oitavas', size: 8, offset: 0 },
+  { label: 'Quartas', size: 4, offset: 8 },
+  { label: 'Semifinais', size: 2, offset: 12 },
+  { label: 'Final', size: 1, offset: 14 },
+]
 
 export function LibertadoresBracket({ data }: { data: LeagueTable }) {
   const allPairs = useMemo(() => {
@@ -68,34 +66,37 @@ export function LibertadoresBracket({ data }: { data: LeagueTable }) {
     return pairs.length ? pairs : null
   }, [data.matches])
 
+  const avail = useMemo(() => {
+    if (!allPairs) return []
+    return ROUNDS.filter(r => allPairs.length >= r.offset + r.size)
+  }, [allPairs])
+
   const [tab, setTab] = useState(0)
 
-  if (!allPairs) {
+  if (!allPairs || avail.length === 0) {
     return <p className="ft-na" style={{ textAlign: 'center', padding: 24 }}>Dados do chaveamento indisponíveis no momento.</p>
   }
 
-  const roundLimit = getRoundLimit(ROUND_LABELS[tab])
-  const shown = allPairs.slice(0, roundLimit)
-  const roundName = ROUND_LABELS[tab]
+  const cur = avail[tab]
+  const shown = allPairs.slice(cur.offset, cur.offset + cur.size)
 
   return (
     <div>
       <div className="ft-tabs" style={{ marginBottom: 18 }}>
-        {ROUND_LABELS.map((name, i) => (
+        {avail.map((r, i) => (
           <button
-            key={name}
+            key={r.label}
             className={`ft-tab${i === tab ? ' is-active' : ''}`}
             onClick={() => setTab(i)}
             type="button"
-            disabled={i > 0 && allPairs.length < getRoundLimit(ROUND_LABELS[i - 1])}
             style={{ fontSize: '.85rem', padding: '8px 18px' }}
           >
-            {name}
+            {r.label}
           </button>
         ))}
       </div>
       <div className="lb-round">
-        <h3 className="lb-round-title">{roundName}</h3>
+        <h3 className="lb-round-title">{cur.label}</h3>
         <div className="lb-round-list">
           {shown.map((pair, pi) => {
             const played = pair.leg1.played && pair.leg2.played

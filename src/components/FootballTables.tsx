@@ -17,7 +17,7 @@ function GruposView({ groups }: { groups: GroupData[] }) {
       {groups.map(g => (
         <div key={g.name} className="ft-grupo-wrap">
           <h4 className="ft-grupo-title">{g.name}</h4>
-          <div className="ft-table-wrap ft-table-lg">
+            <div className="ft-table-wrap ft-table-lg">
             <div className="ft-table-header">
               <span className="ft-pos">#</span>
               <span className="ft-team">Time</span>
@@ -26,8 +26,6 @@ function GruposView({ groups }: { groups: GroupData[] }) {
               <span className="ft-stat" title="Vitórias">V</span>
               <span className="ft-stat" title="Empates">E</span>
               <span className="ft-stat" title="Derrotas">D</span>
-              <span className="ft-stat" title="Gols Pró">GP</span>
-              <span className="ft-stat" title="Gols Contra">GC</span>
               <span className="ft-stat" title="Saldo">SG</span>
             </div>
             {g.teams.map(team => (
@@ -42,8 +40,6 @@ function GruposView({ groups }: { groups: GroupData[] }) {
                 <span className="ft-stat">{team.v}</span>
                 <span className="ft-stat">{team.e}</span>
                 <span className="ft-stat">{team.d}</span>
-                <span className="ft-stat">{team.gp}</span>
-                <span className="ft-stat">{team.gc}</span>
                 <span className="ft-stat">{team.sg}</span>
               </div>
             ))}
