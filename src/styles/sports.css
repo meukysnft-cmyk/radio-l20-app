@@ -196,7 +196,19 @@
 .ft-tab { padding: 6px 14px; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--surface); color: var(--text); font-size: .78rem; font-weight: 700; cursor: pointer; transition: all .15s; }
 .ft-tab:hover { border-color: var(--brand); color: var(--brand-bright); }
 .ft-tab.is-active { border-color: var(--brand); background: var(--brand); color: #fff; }
-.ft-tab-sm { font-size: .72rem; padding: 4px 10px; }
+/* ── Stacked groups ── */
+.ft-grupos-stacked { display: grid; gap: 28px; }
+.ft-grupo-wrap { }
+.ft-grupo-title { margin: 0 0 8px; font-size: 1rem; font-weight: 800; color: var(--brand-bright); text-transform: uppercase; letter-spacing: .03em; }
+.ft-table-lg { }
+.ft-table-lg .ft-table-header,
+.ft-table-lg .ft-row { grid-template-columns: 36px 1fr repeat(8, 40px); font-size: .85rem; padding: 10px 14px; }
+.ft-table-lg .ft-pos { font-size: .78rem; }
+.ft-table-lg .ft-team { font-size: .88rem; font-weight: 600; }
+.ft-table-lg .ft-stat { font-size: .85rem; }
+.ft-table-lg .ft-stat-bold { font-size: .9rem; }
+.ft-logo { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; border-radius: 4px; display: inline-block; vertical-align: middle; }
+.ft-logo-fallback { display: inline-flex; align-items: center; justify-content: center; background: var(--surface-deep); border: 1px solid var(--line); font-size: .6rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
 .ft-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
 .ft-table-header, .ft-row { display: grid; grid-template-columns: 32px 1fr repeat(5, 32px) repeat(3, 36px) 72px; gap: 4px; align-items: center; padding: 8px 12px; font-size: .78rem; }
 .ft-table-header { background: var(--surface-deep); color: var(--text-muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--line); }

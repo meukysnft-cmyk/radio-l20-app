@@ -228,7 +228,9 @@ async function fetchSerie(serie: SerieConfig): Promise<LeagueTable | null> {
       if (chaves.length) {
         const [scorers, groups] = await Promise.all([
           Promise.resolve(extractArtilharia(html)),
-          serie.slug === 'libertadores' ? fetchGroupsFromOpta() : Promise.resolve([]),
+          serie.slug === 'libertadores'
+            ? fetchGroupsFromOpta(buildLogoMap(chaves))
+            : Promise.resolve([]),
         ])
         return {
           league: serie.name,
@@ -251,10 +253,19 @@ async function fetchSerie(serie: SerieConfig): Promise<LeagueTable | null> {
   }
 }
 
+function buildLogoMap(chaves: { home: string; homeLogo: string; away: string; awayLogo: string }[]): Record<string, string> {
+  const map: Record<string, string> = {}
+  for (const c of chaves) {
+    if (c.homeLogo) map[c.home.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')] = c.homeLogo
+    if (c.awayLogo) map[c.away.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')] = c.awayLogo
+  }
+  return map
+}
+
 const OPTA_BASE = 'https://api.performfeeds.com/soccerdata/standings/a5oqwilhwzb2174uel4v42sus'
 const OPTA_TOURNAMENT_ID = 'dk8bg66qizwked9etonwaaln8'
 
-async function fetchGroupsFromOpta(): Promise<GroupData[]> {
+async function fetchGroupsFromOpta(logoMap?: Record<string, string>): Promise<GroupData[]> {
   try {
     const url = `${OPTA_BASE}?_rt=c&_fmt=json&_lcl=pt-br&tmcl=${OPTA_TOURNAMENT_ID}&type=total`
     const res = await fetch(url, {
@@ -270,20 +281,25 @@ async function fetchGroupsFromOpta(): Promise<GroupData[]> {
     if (!stage?.division) return []
     return stage.division.map((div: any) => ({
       name: div.groupName || '',
-      teams: (div.ranking || []).map((r: any) => ({
-        pos: r.rank ?? 0,
-        name: r.contestantClubName || r.contestantName || '',
-        code: r.contestantCode || '',
-        pts: r.points ?? 0,
-        pj: r.matchesPlayed ?? 0,
-        v: r.matchesWon ?? 0,
-        e: r.matchesDrawn ?? 0,
-        d: r.matchesLost ?? 0,
-        gp: r.goalsFor ?? 0,
-        gc: r.goalsAgainst ?? 0,
-        sg: r.goaldifference ?? '0',
-        ultimos: r.lastSix ? r.lastSix.split('') : [],
-      })),
+      teams: (div.ranking || []).map((r: any) => {
+        const name = r.contestantClubName || r.contestantName || ''
+        const key = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        return {
+          pos: r.rank ?? 0,
+          name,
+          code: r.contestantCode || '',
+          logo: logoMap?.[key] || '',
+          pts: r.points ?? 0,
+          pj: r.matchesPlayed ?? 0,
+          v: r.matchesWon ?? 0,
+          e: r.matchesDrawn ?? 0,
+          d: r.matchesLost ?? 0,
+          gp: r.goalsFor ?? 0,
+          gc: r.goalsAgainst ?? 0,
+          sg: r.goaldifference ?? '0',
+          ultimos: r.lastSix ? r.lastSix.split('') : [],
+        }
+      }),
     }))
   } catch {
     return []
