@@ -79,21 +79,22 @@ export function SportsPage() {
         ))}
       </div>
 
+      <div className="sport-grid-4">
+        {SPORTS.map((s) => (
+          <Link
+            key={s.name}
+            to={`${radioRoutes.sport}/${s.slug}`}
+            className="sport-card-4"
+            style={{ '--sport-color': s.color } as React.CSSProperties}
+          >
+            <span className="sport-card-4-icon">{s.icon}</span>
+            <h3>{s.name}</h3>
+          </Link>
+        ))}
+      </div>
+
       {tab === 'local' && (
         <>
-          <div className="sport-grid-4">
-            {SPORTS.map((s) => (
-              <Link
-                key={s.name}
-                to={`${radioRoutes.sport}/${s.slug}`}
-                className="sport-card-4"
-                style={{ '--sport-color': s.color } as React.CSSProperties}
-              >
-                <span className="sport-card-4-icon">{s.icon}</span>
-                <h3>{s.name}</h3>
-              </Link>
-            ))}
-          </div>
           {sportNews.filter((n) => n.category === 'Esporte Local').length > 0 ? (
             <div className="sport-news-section">
               <h2 className="section-title">Notícias do Esporte Local</h2>
