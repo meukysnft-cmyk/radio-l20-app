@@ -9,6 +9,34 @@ type RewriteResult = {
   sourceUrl: string
 }
 
+function stripTags(text: string): string {
+  return text
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#\d+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function extractContainer(html: string): string {
+  const patterns = [
+    /<article[\s\S]*?<\/article>/i,
+    /<main[\s\S]*?<\/main>/i,
+    /<div[^>]*class="[^"]*\b(?:post-content|article-content|entry-content|content-single|noticia-conteudo|texto-noticia)\b[^"]*"[\s\S]*?<\/div>/i,
+    /<div[^>]*itemprop="articleBody"[\s\S]*?<\/div>/i,
+    /<section[^>]*class="[^"]*\b(?:content|article-body|post-body)\b[^"]*"[\s\S]*?<\/section>/i,
+  ]
+  for (const p of patterns) {
+    const m = html.match(p)
+    if (m) return m[0]
+  }
+  return html
+}
+
 async function extractArticle(url: string): Promise<{ title: string; body: string; imageUrl: string }> {
   const res = await fetch(url, {
     headers: {
@@ -16,29 +44,40 @@ async function extractArticle(url: string): Promise<{ title: string; body: strin
       Accept: 'text/html',
       'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
     },
-    signal: AbortSignal.timeout(12_000),
+    signal: AbortSignal.timeout(15_000),
     redirect: 'follow',
   })
   const html = await res.text()
 
   const title =
     html.match(/<meta\s+property="og:title"\s+content="([^"]*)"/i)?.[1]
+    || html.match(/<meta\s+name="title"\s+content="([^"]*)"/i)?.[1]
     || html.match(/<title>([^<]*)<\/title>/)?.[1]
     || ''
 
   const imageUrl = html.match(/<meta\s+property="og:image"\s+content="([^"]*)"/i)?.[1] || ''
 
-  const bodyParts: string[] = []
-
-  const articleMatch = html.match(/<article[\s\S]*?<\/article>/i)
-  const container = articleMatch?.[0] || html
+  const container = extractContainer(html)
 
   const pTags = container.match(/<p[^>]*>([\s\S]*?)<\/p>/gi)
+  const bodyParts: string[] = []
   if (pTags) {
     for (const p of pTags) {
-      const text = p.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#\d+;/g, '').trim()
+      const text = stripTags(p)
       if (text && text.length > 20) {
         bodyParts.push(text)
+      }
+    }
+  }
+
+  if (bodyParts.length === 0) {
+    const divs = container.match(/<div[^>]*>([\s\S]*?)<\/div>/gi)
+    if (divs) {
+      for (const d of divs) {
+        const text = stripTags(d)
+        if (text && text.length > 80) {
+          bodyParts.push(text)
+        }
       }
     }
   }
