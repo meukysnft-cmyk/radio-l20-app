@@ -65,6 +65,7 @@ function formatNewsDate(value: unknown) {
 export function NewsPage() {
   const content = siteContent
   const [newsItems, setNewsItems] = useState<NewsDocument[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchParams] = useSearchParams()
   const selectedProgramSlug = searchParams.get('program') ?? ''
   const selectedProgramLabel = getProgramLabelBySlug(selectedProgramSlug)
@@ -86,10 +87,12 @@ export function NewsPage() {
           return secondCreated - firstCreated
         })
         setNewsItems(sorted)
+        setIsLoading(false)
       },
       (error) => {
         console.error('Falha ao ouvir notícias do Firestore.', error)
         setNewsItems([])
+        setIsLoading(false)
       },
     )
   }, [])
@@ -169,7 +172,7 @@ export function NewsPage() {
         </div>
       )}
 
-      {newsItems.length === 0 ? (
+      {isLoading ? (
         <SkNewsPageLayout />
       ) : visibleNewsItems.length > 0 ? (
         <>
