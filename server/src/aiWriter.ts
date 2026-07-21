@@ -1,5 +1,5 @@
-const DEEPSEEK_API_KEY = () => process.env.DEEPSEEK_API_KEY || ''
-const DEEPSEEK_MODELS = ['deepseek-chat']
+const OPENROUTER_API_KEY = () => process.env.OPENROUTER_API_KEY || ''
+const OPENROUTER_MODELS = ['meta-llama/llama-3.1-70b-instruct', 'meta-llama/llama-3.1-8b-instruct']
 
 type RewriteResult = {
   title: string
@@ -109,12 +109,14 @@ Conteúdo:
 ${originalBody.slice(0, 5000)}`
 }
 
-async function callDeepSeek(prompt: string, key: string, model: string): Promise<any> {
-  const res = await fetch('https://api.deepseek.com/chat/completions', {
+async function callOpenRouter(prompt: string, key: string, model: string): Promise<any> {
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${key}`,
       'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://canal-l20.web.app',
+      'X-Title': 'Radio L20',
     },
     body: JSON.stringify({
       model,
@@ -128,7 +130,7 @@ async function callDeepSeek(prompt: string, key: string, model: string): Promise
   if (!res.ok) {
     const err = await res.text()
     if (res.status === 429) throw new Error('QUOTA_EXCEEDED')
-    throw new Error(`DeepSeek API error ${res.status}: ${err.slice(0, 200)}`)
+    throw new Error(`OpenRouter API error ${res.status}: ${err.slice(0, 200)}`)
   }
 
   return res.json()
@@ -146,8 +148,8 @@ function extractJson(raw: string): any {
 }
 
 export async function rewriteArticle(url: string, instructions = ''): Promise<RewriteResult> {
-  const key = DEEPSEEK_API_KEY()
-  if (!key) throw new Error('DEEPSEEK_API_KEY não configurada no servidor')
+  const key = OPENROUTER_API_KEY()
+  if (!key) throw new Error('OPENROUTER_API_KEY não configurada no servidor')
 
   const { title, body, imageUrl } = await extractArticle(url)
   if (!body) throw new Error('Não foi possível extrair o conteúdo do artigo')
@@ -155,11 +157,11 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
   const prompt = buildPrompt(title, body, instructions)
 
   let lastError = ''
-  for (const model of DEEPSEEK_MODELS) {
+  for (const model of OPENROUTER_MODELS) {
     for (let attempt = 0; attempt < 2; attempt++) {
       if (attempt > 0) await sleep(2000)
       try {
-        const data = await callDeepSeek(prompt, key, model)
+        const data = await callOpenRouter(prompt, key, model)
         const raw = data?.choices?.[0]?.message?.content || ''
         if (!raw) throw new Error('Resposta vazia da IA')
 
@@ -174,7 +176,7 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         if (msg === 'QUOTA_EXCEEDED') {
-          lastError = `Cota excedida no modelo ${model}. ${model === DEEPSEEK_MODELS[DEEPSEEK_MODELS.length - 1] ? 'Cota gratuita esgotada no DeepSeek. Crie uma nova chave em platform.deepseek.com/api_keys.' : 'Tentando próximo modelo...'}`
+          lastError = `Cota excedida no modelo ${model}. ${model === OPENROUTER_MODELS[OPENROUTER_MODELS.length - 1] ? 'Cota gratuita esgotada no OpenRouter. Crie nova chave em openrouter.ai/keys.' : 'Tentando próximo modelo...'}`
           await sleep(1000)
           break
         }
