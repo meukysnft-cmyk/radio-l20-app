@@ -22,6 +22,27 @@ export type Scorer = {
   goals: number
 }
 
+export type GroupStanding = {
+  pos: number
+  name: string
+  code: string
+  logo?: string
+  pts: number
+  pj: number
+  v: number
+  e: number
+  d: number
+  gp: number
+  gc: number
+  sg: string
+  ultimos: string[]
+}
+
+export type GroupData = {
+  name: string
+  teams: GroupStanding[]
+}
+
 export type MatchData = {
   phase: string
   chaves: {
@@ -36,6 +57,7 @@ export type MatchData = {
     played: boolean
   }[]
   scorers?: Scorer[]
+  groups?: GroupData[]
 }
 
 export type LeagueTable = {
@@ -204,7 +226,10 @@ async function fetchSerie(serie: SerieConfig): Promise<LeagueTable | null> {
       }
 
       if (chaves.length) {
-        const scorers = extractArtilharia(html)
+        const [scorers, groups] = await Promise.all([
+          Promise.resolve(extractArtilharia(html)),
+          serie.slug === 'libertadores' ? fetchGroupsFromOpta() : Promise.resolve([]),
+        ])
         return {
           league: serie.name,
           slug: serie.slug,
@@ -214,6 +239,7 @@ async function fetchSerie(serie: SerieConfig): Promise<LeagueTable | null> {
             phase: data.fase.nome || '',
             chaves,
             ...(scorers.length ? { scorers } : {}),
+            ...(groups.length ? { groups } : {}),
           },
         }
       }
@@ -222,6 +248,45 @@ async function fetchSerie(serie: SerieConfig): Promise<LeagueTable | null> {
     return null
   } catch {
     return null
+  }
+}
+
+const OPTA_BASE = 'https://api.performfeeds.com/soccerdata/standings/a5oqwilhwzb2174uel4v42sus'
+const OPTA_TOURNAMENT_ID = 'dk8bg66qizwked9etonwaaln8'
+
+async function fetchGroupsFromOpta(): Promise<GroupData[]> {
+  try {
+    const url = `${OPTA_BASE}?_rt=c&_fmt=json&_lcl=pt-br&tmcl=${OPTA_TOURNAMENT_ID}&type=total`
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        Referer: 'https://gol.conmebol.com/',
+      },
+      signal: AbortSignal.timeout(15_000),
+    })
+    if (!res.ok) return []
+    const json = await res.json()
+    const stage = json.stage?.[0]
+    if (!stage?.division) return []
+    return stage.division.map((div: any) => ({
+      name: div.groupName || '',
+      teams: (div.ranking || []).map((r: any) => ({
+        pos: r.rank ?? 0,
+        name: r.contestantClubName || r.contestantName || '',
+        code: r.contestantCode || '',
+        pts: r.points ?? 0,
+        pj: r.matchesPlayed ?? 0,
+        v: r.matchesWon ?? 0,
+        e: r.matchesDrawn ?? 0,
+        d: r.matchesLost ?? 0,
+        gp: r.goalsFor ?? 0,
+        gc: r.goalsAgainst ?? 0,
+        sg: r.goaldifference ?? '0',
+        ultimos: r.lastSix ? r.lastSix.split('') : [],
+      })),
+    }))
+  } catch {
+    return []
   }
 }
 

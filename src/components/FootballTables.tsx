@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { LeagueTable } from '../types/content'
+import type { LeagueTable, GroupData } from '../types/content'
 import { fetchLeagueTables } from '../services/footballApi'
 import { LibertadoresBracket } from './LibertadoresBracket'
 
@@ -9,6 +9,66 @@ const LEAGUE_CARD: Record<string, { label: string; icon: string }> = {
   'brasileirao-serie-c': { label: 'Série C', icon: '🇧🇷' },
   'brasileirao-serie-d': { label: 'Série D', icon: '🇧🇷' },
   'libertadores': { label: 'Libertadores', icon: '🌎' },
+}
+
+function GruposView({ groups }: { groups: GroupData[] }) {
+  const [selected, setSelected] = useState<string>(groups[0]?.name || '')
+  const active = groups.find(g => g.name === selected) || groups[0]
+  return (
+    <div>
+      <div className="ft-grupos-tabs" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+        {groups.map(g => (
+          <button
+            key={g.name}
+            className={`ft-tab ft-tab-sm${g.name === (active?.name) ? ' is-active' : ''}`}
+            onClick={() => setSelected(g.name)}
+            type="button"
+          >
+            {g.name}
+          </button>
+        ))}
+      </div>
+      {active ? (
+        <div className="ft-table-wrap">
+          <div className="ft-table-header">
+            <span className="ft-pos">#</span>
+            <span className="ft-team">Time</span>
+            <span className="ft-stat" title="Pontos">P</span>
+            <span className="ft-stat" title="Jogos">J</span>
+            <span className="ft-stat" title="Vitórias">V</span>
+            <span className="ft-stat" title="Empates">E</span>
+            <span className="ft-stat" title="Derrotas">D</span>
+            <span className="ft-stat d-none-mobile" title="Gols Pró">GP</span>
+            <span className="ft-stat d-none-mobile" title="Gols Contra">GC</span>
+            <span className="ft-stat d-none-mobile" title="Saldo">SG</span>
+            <span className="ft-stat ft-stat-ultimos">Últimos</span>
+          </div>
+          {active.teams.map(team => (
+            <div key={team.pos} className={`ft-row${team.pos <= 2 ? ' ft-g4' : ''}`}>
+              <span className="ft-pos">{team.pos}</span>
+              <span className="ft-team">{team.name} <small style={{ opacity: 0.5, fontSize: '.7rem' }}>{team.code}</small></span>
+              <span className="ft-stat ft-stat-bold">{team.pts}</span>
+              <span className="ft-stat">{team.pj}</span>
+              <span className="ft-stat">{team.v}</span>
+              <span className="ft-stat">{team.e}</span>
+              <span className="ft-stat">{team.d}</span>
+              <span className="ft-stat d-none-mobile">{team.gp}</span>
+              <span className="ft-stat d-none-mobile">{team.gc}</span>
+              <span className="ft-stat d-none-mobile">{team.sg}</span>
+              <span className="ft-stat ft-stat-ultimos">
+                {team.ultimos?.length ? team.ultimos.map((r, i) => <ResultDot key={i} result={r} />) : <span className="ft-na">—</span>}
+              </span>
+            </div>
+          ))}
+          <div className="ft-legend">
+            <span><span className="ft-dot" style={{ background: 'var(--success)' }} /> Vitória</span>
+            <span><span className="ft-dot" style={{ background: 'var(--error)' }} /> Derrota</span>
+            <span><span className="ft-dot" style={{ background: 'var(--text-muted)' }} /> Empate</span>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 function ResultDot({ result }: { result: string }) {
@@ -108,7 +168,9 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
           </div>
 
           {subTab === 'grupos' ? (
-            active.teams.length > 0 ? (
+            active.matches?.groups && active.matches.groups.length > 0 ? (
+              <GruposView groups={active.matches.groups} />
+            ) : active.teams.length > 0 ? (
               <div className="ft-table-wrap">
                 <div className="ft-table-header">
                   <span className="ft-pos">#</span>
@@ -148,7 +210,7 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
               </div>
             ) : (
               <p className="ft-na" style={{ textAlign: 'center', padding: 24 }}>
-                Fase de grupos encerrada. Os classificados avançaram para o mata-mata.
+                Dados da fase de grupos indisponíveis no momento.
               </p>
             )
           ) : subTab === 'artilharia' ? (

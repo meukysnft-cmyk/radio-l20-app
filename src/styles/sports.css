@@ -124,31 +124,40 @@
 .lb-node-empty{background:transparent;border-color:transparent;justify-content:center}
 .lb-node-empty .lb-node-inner{color:var(--text-muted);font-style:italic;font-size:.68rem}
 .lb-node-played{border-color:var(--gold-dark,var(--brand))}
-.lb-node-inner{width:100%;display:grid;gap:3px}
-.lb-legs{display:grid;gap:4px}
-.lb-leg{border-bottom:1px dashed var(--line);padding-bottom:4px}
-.lb-leg:last-child{border-bottom:none;padding-bottom:0}
-.lb-leg-label{font-size:.58rem;font-weight:700;color:var(--gold-dark,var(--text-muted));text-transform:uppercase;letter-spacing:.5px;display:inline-block;margin-right:6px}
-.lb-leg-date{font-size:.58rem;color:var(--text-muted);display:inline-block}
-.lb-leg-match{display:flex;align-items:center;gap:3px;margin-top:1px;flex-wrap:nowrap}
-.lb-logo{width:14px;height:14px;object-fit:contain;flex-shrink:0}
-.lb-name{font-weight:600;color:var(--text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.72rem}
-.lb-name-sm{font-size:.65rem;max-width:60px}
-.lb-winner{color:var(--gold-light,var(--brand-bright))}
-.lb-loser{opacity:.4;text-decoration:line-through}
-.lb-score{text-align:right;font-weight:700;color:var(--text);font-size:.72rem}
-.lb-score-sm{font-weight:700;color:var(--text);font-size:.65rem;flex-shrink:0}
-.lb-score-x{color:var(--text-muted);font-size:.58rem;flex-shrink:0}
-.lb-agg{font-size:.6rem;color:var(--gold-light,var(--brand-bright));text-align:center;font-weight:600;margin-top:2px;letter-spacing:.3px}
-.lb-conn{position:relative;border-right:2px solid var(--gold-dark,var(--brand))}
-.lb-conn::before,.lb-conn::after{content:'';position:absolute;left:0;width:50%;height:2px;background:var(--gold-dark,var(--brand))}
-.lb-conn::before{top:25%}
-.lb-conn::after{top:75%}
+.lb-node-inner{width:100%;display:grid;gap:2px}
+.lb-inner{display:grid;gap:3px;width:100%}
+/* Bracket */
+.lb-wrap{overflow-x:auto;padding:4px 0}
+.lb-grid{display:grid;gap:0;min-width:520px}
+.lb-col-title{font-size:.75rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;background:rgba(255,255,255,.03);border-radius:4px 4px 0 0;text-align:center}
+.lb-node{background:var(--bg2,#1a1d23);border:1px solid var(--gold-dark,#333);border-radius:6px;padding:6px 8px;display:flex;align-items:center}
+.lb-node-played{border-color:var(--gold-light,#c9a84c)}
+.lb-node-empty{background:transparent;border:1px dashed var(--text-faint,#333);justify-content:center;color:var(--text-faint,#555);font-size:.7rem}
+.lb-node-inner{text-align:center;width:100%}
+.lb-inner{width:100%}
+.lb-game{display:grid;grid-template-columns:48px 20px 1fr 22px 8px 22px 1fr 20px;gap:3px;align-items:center;line-height:1.4;padding:2px 0}
+.lb-game+.lb-game{border-top:1px solid var(--border-faint,rgba(255,255,255,.06));padding-top:4px;margin-top:2px}
+.lb-gdate{font-size:.7rem;color:var(--text-muted);text-align:left}
+.lb-glogo{width:18px;height:18px;object-fit:contain}
+.lb-gteam{font-size:.72rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-gteam-bold{font-weight:700;color:var(--text-strong)}
+.lb-gscore{font-size:.72rem;color:var(--text-muted);text-align:center;font-weight:600}
+.lb-gscore-bold{font-weight:700;color:var(--text-strong)}
+.lb-gx{font-size:.6rem;color:var(--text-muted);text-align:center}
+.lb-agg{font-size:.65rem;color:var(--gold-light,var(--brand-bright));text-align:center;font-weight:600;margin-top:2px;letter-spacing:.3px}
+.lb-conn{position:relative;border-right:3px solid var(--gold-dark,var(--brand))}
+.lb-conn::before,.lb-conn::after{content:'';position:absolute;left:0;width:50%;height:3px;background:var(--gold-dark,var(--brand))}
+.lb-conn::before{top:33%}
+.lb-conn::after{top:66%}
 
 @media (max-width:640px){
-  .lb-name-sm{max-width:48px;font-size:.6rem}
-  .lb-leg-match{gap:2px}
-  .lb-score-sm{font-size:.6rem}
+  .lb-game{grid-template-columns:38px 16px 1fr 18px 6px 18px 1fr 16px}
+  .lb-glogo{width:14px;height:14px}
+  .lb-gteam{font-size:.65rem}
+  .lb-gscore{font-size:.65rem}
+  .lb-gdate{font-size:.62rem}
+  .lb-node{padding:4px 6px}
+  .lb-col-title{font-size:.68rem}
 }
 
 /* ── Artilharia ── */
@@ -187,6 +196,7 @@
 .ft-tab { padding: 6px 14px; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--surface); color: var(--text); font-size: .78rem; font-weight: 700; cursor: pointer; transition: all .15s; }
 .ft-tab:hover { border-color: var(--brand); color: var(--brand-bright); }
 .ft-tab.is-active { border-color: var(--brand); background: var(--brand); color: #fff; }
+.ft-tab-sm { font-size: .72rem; padding: 4px 10px; }
 .ft-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
 .ft-table-header, .ft-row { display: grid; grid-template-columns: 32px 1fr repeat(5, 32px) repeat(3, 36px) 72px; gap: 4px; align-items: center; padding: 8px 12px; font-size: .78rem; }
 .ft-table-header { background: var(--surface-deep); color: var(--text-muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--line); }
@@ -205,6 +215,13 @@
 .ft-legend { display: flex; gap: 14px; padding: 8px 12px; border-top: 1px solid var(--line); font-size: .7rem; color: var(--text-muted); }
 .ft-legend .ft-dot { width: 14px; height: 14px; border-radius: 3px; margin-right: 4px; font-size: 0; }
 .ft-footer { margin: 8px 0 0; color: var(--text-muted); font-size: .7rem; text-align: right; }
+.ft-grupos-classif{padding:12px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface)}
+.ft-grupos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.ft-grupo-block{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-deep);overflow:hidden}
+.ft-grupo-header{font-size:.72rem;font-weight:700;color:var(--brand);padding:6px 10px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:.4px}
+.ft-grupo-teams{display:grid;gap:1px;background:var(--line)}
+.ft-grupo-time{display:grid;grid-template-columns:18px 1fr;gap:6px;align-items:center;padding:5px 10px;font-size:.72rem;color:var(--text);font-weight:500;background:var(--surface-deep)}
+.ft-grupo-logo{width:16px;height:16px;object-fit:contain}
 .ft-loading { display: grid; gap: 8px; }
 
 @media (max-width: 640px) {

@@ -279,10 +279,32 @@ export type Scorer = {
   goals: number
 }
 
+export type GroupStanding = {
+  pos: number
+  name: string
+  code: string
+  logo?: string
+  pts: number
+  pj: number
+  v: number
+  e: number
+  d: number
+  gp: number
+  gc: number
+  sg: string
+  ultimos: string[]
+}
+
+export type GroupData = {
+  name: string
+  teams: GroupStanding[]
+}
+
 export type MatchData = {
   phase: string
   chaves: MatchChave[]
   scorers?: Scorer[]
+  groups?: GroupData[]
 }
 
 export type LeagueTable = {
