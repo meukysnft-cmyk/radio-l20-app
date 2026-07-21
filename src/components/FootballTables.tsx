@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import type { LeagueTable, GroupData, NewsItem } from '../types/content'
+import type { LeagueTable, GroupData, NewsItem, NewsDocument } from '../types/content'
 import { fetchLeagueTables, fetchNews } from '../services/footballApi'
+import { subscribeDocuments } from '../services/firestoreService'
 import { NewsCard } from './ContentCards'
 import { LibertadoresBracket } from './LibertadoresBracket'
 
@@ -67,10 +68,19 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
   const [subTab, setSubTab] = useState<SubTab>('chaveamento')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [news, setNews] = useState<NewsItem[]>([])
+  const [rssNews, setRssNews] = useState<NewsItem[]>([])
+  const [firestoreNews, setFirestoreNews] = useState<NewsDocument[]>([])
 
   useEffect(() => {
-    fetchNews().then(setNews).catch(() => {})
+    fetchNews().then(setRssNews).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    return subscribeDocuments<NewsDocument>('news', (docs) => {
+      setFirestoreNews(
+        docs.filter(d => d.status === 'published' && d.category.toLowerCase().includes('libertadores'))
+      )
+    })
   }, [])
 
   useEffect(() => {
@@ -118,6 +128,24 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
   }
 
   const isLibertadores = selected === 'libertadores'
+
+  const allNews = [
+    ...firestoreNews.map(d => ({
+      id: d.id || d.title,
+      title: d.title,
+      description: d.excerpt || d.content || '',
+      source: d.author || 'Rádio L20',
+      sourceUrl: '',
+      articleUrl: '',
+      imageUrl: d.imageUrl || '',
+      publishedAt: (() => {
+        const v = d.createdAt as any
+        if (!v || !v.seconds) return ''
+        return new Date(v.seconds * 1000).toISOString()
+      })(),
+    })),
+    ...rssNews,
+  ].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
 
   return (
     <div>
@@ -238,8 +266,8 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
             )
             ) : subTab === 'noticias' ? (
               <div className="ft-news-grid">
-                {news.length > 0 ? (
-                  news.map(item => (
+                {allNews.length > 0 ? (
+                  allNews.map(item => (
                     <NewsCard key={item.id} item={{
                       category: item.source || 'Libertadores',
                       title: item.title,
