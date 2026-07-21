@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY || ''
-const GEMINI_MODEL = 'gemini-2.0-flash'
+const GEMINI_MODELS = ['gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-2.5-flash-lite']
 const GEMINI_API_VERSION = 'v1'
 
 type RewriteResult = {
@@ -110,17 +110,9 @@ Conteúdo:
 ${originalBody.slice(0, 5000)}`
 }
 
-export async function rewriteArticle(url: string, instructions = ''): Promise<RewriteResult> {
-  const key = GEMINI_API_KEY()
-  if (!key) throw new Error('GEMINI_API_KEY não configurada no servidor')
-
-  const { title, body, imageUrl } = await extractArticle(url)
-  if (!body) throw new Error('Não foi possível extrair o conteúdo do artigo')
-
-  const prompt = buildPrompt(title, body, instructions)
-
+async function callGemini(prompt: string, key: string, model: string): Promise<any> {
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${key}`,
+    `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${model}:generateContent?key=${key}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -134,22 +126,57 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
 
   if (!res.ok) {
     const err = await res.text()
+    if (res.status === 429) throw new Error('QUOTA_EXCEEDED')
     throw new Error(`Gemini API error ${res.status}: ${err.slice(0, 200)}`)
   }
 
-  const data = await res.json() as any
-  const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
-  if (!raw) throw new Error('Resposta vazia da IA')
+  return res.json()
+}
 
-  const jsonMatch = raw.replace(/```json\s*/gi, '').replace(/```\s*$/g, '').match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('Formato inválido na resposta da IA')
+async function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms))
+}
 
-  const parsed = JSON.parse(jsonMatch[0])
-  return {
-    title: parsed.title || title,
-    content: parsed.content || '',
-    excerpt: parsed.excerpt || '',
-    imageUrl,
-    sourceUrl: url,
+export async function rewriteArticle(url: string, instructions = ''): Promise<RewriteResult> {
+  const key = GEMINI_API_KEY()
+  if (!key) throw new Error('GEMINI_API_KEY não configurada no servidor')
+
+  const { title, body, imageUrl } = await extractArticle(url)
+  if (!body) throw new Error('Não foi possível extrair o conteúdo do artigo')
+
+  const prompt = buildPrompt(title, body, instructions)
+
+  let lastError = ''
+  for (const model of GEMINI_MODELS) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt > 0) await sleep(2000)
+      try {
+        const data = await callGemini(prompt, key, model)
+        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
+        if (!raw) throw new Error('Resposta vazia da IA')
+
+        const jsonMatch = raw.replace(/```json\s*/gi, '').replace(/```\s*$/g, '').match(/\{[\s\S]*\}/)
+        if (!jsonMatch) throw new Error('Formato inválido na resposta da IA')
+
+        const parsed = JSON.parse(jsonMatch[0])
+        return {
+          title: parsed.title || title,
+          content: parsed.content || '',
+          excerpt: parsed.excerpt || '',
+          imageUrl,
+          sourceUrl: url,
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        if (msg === 'QUOTA_EXCEEDED') {
+          lastError = `Cota excedida no modelo ${model}. ${model === GEMINI_MODELS[GEMINI_MODELS.length - 1] ? 'Todos os modelos disponíveis estão sem cota. Tente novamente mais tarde ou ative faturamento no Google AI Studio.' : `Tentando próximo modelo...`}`
+          await sleep(1000)
+          break // move to next model
+        }
+        if (attempt === 1) lastError = msg
+      }
+    }
   }
+
+  throw new Error(lastError || 'Erro ao reescrever artigo')
 }
