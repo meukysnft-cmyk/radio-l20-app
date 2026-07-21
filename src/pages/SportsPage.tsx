@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { BlogCard } from '../components/ContentCards'
 import { radioRoutes } from '../config/radioLinks'
 import { SPORTS } from '../data/sportsData'
-import { FootballTables } from '../components/FootballTables'
 import { subscribeDocuments } from '../services/firestoreService'
 import type { NewsDocument } from '../types/content'
 import type { ContentCard } from '../data/siteContent'
@@ -115,8 +114,6 @@ export function SportsPage() {
 
       {tab === 'nacional' && (
         <div>
-          <p className="ft-sub" style={{ marginBottom: 14 }}>Campeonatos nacionais com classificação atualizada.</p>
-          <FootballTables slugs={['brasileirao-serie-a', 'brasileirao-serie-b', 'brasileirao-serie-c']} />
           {sportNews.filter((n) => n.category === 'Esporte Nacional').length > 0 ? (
             <div className="sport-news-section">
               <h2 className="section-title">Notícias do Esporte Nacional</h2>
@@ -137,8 +134,6 @@ export function SportsPage() {
 
       {tab === 'internacional' && (
         <div>
-          <p className="ft-sub" style={{ marginBottom: 14 }}>Competições internacionais com classificação atualizada.</p>
-          <FootballTables slugs={['libertadores']} />
           {sportNews.filter((n) => n.category === 'Esporte Internacional').length > 0 ? (
             <div className="sport-news-section">
               <h2 className="section-title">Notícias do Esporte Internacional</h2>

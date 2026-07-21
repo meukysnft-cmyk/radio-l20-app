@@ -3,12 +3,21 @@ import { Link, useParams } from 'react-router-dom'
 import { getSportBySlug, SPORTS } from '../data/sportsData'
 import { radioRoutes } from '../config/radioLinks'
 import { subscribeDocuments } from '../services/firestoreService'
+import { FootballTables } from '../components/FootballTables'
 import type { NewsDocument } from '../types/content'
+
+type FutebolTab = 'nacional' | 'internacional'
+
+const FUTEBOL_TABS: { key: FutebolTab; label: string; slugs: string[] }[] = [
+  { key: 'nacional', label: 'Nacional', slugs: ['brasileirao-serie-a', 'brasileirao-serie-b', 'brasileirao-serie-c'] },
+  { key: 'internacional', label: 'Internacional', slugs: ['libertadores'] },
+]
 
 export function SportDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const sport = slug ? getSportBySlug(slug) : undefined
   const [news, setNews] = useState<NewsDocument[]>([])
+  const [futebolTab, setFutebolTab] = useState<FutebolTab>('nacional')
 
   useEffect(() => {
     if (!sport) return
@@ -54,6 +63,28 @@ export function SportDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Tables only for Futebol */}
+      {sport.slug === 'futebol' && (
+        <div style={{ display: 'grid', gap: 16, marginBottom: 24 }}>
+          <div className="sport-tabs" style={{ marginBottom: 16 }}>
+            {FUTEBOL_TABS.map((t) => (
+              <button
+                key={t.key}
+                className={`sport-tab${futebolTab === t.key ? ' is-active' : ''}`}
+                onClick={() => setFutebolTab(t.key)}
+                type="button"
+              >
+                <span className="sport-tab-label">{t.label}</span>
+              </button>
+            ))}
+          </div>
+          {(() => {
+            const active = FUTEBOL_TABS.find((t) => t.key === futebolTab)
+            return active ? <FootballTables slugs={active.slugs} /> : null
+          })()}
+        </div>
+      )}
 
       {/* News */}
       <div style={{ display: 'grid', gap: 16 }}>
