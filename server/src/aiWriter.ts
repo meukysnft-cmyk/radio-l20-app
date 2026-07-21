@@ -1,5 +1,5 @@
-const GROQ_API_KEY = () => process.env.GROQ_API_KEY || ''
-const GROQ_MODELS = ['llama-3.1-70b-versatile', 'llama-3.1-8b-instant']
+const DEEPSEEK_API_KEY = () => process.env.DEEPSEEK_API_KEY || ''
+const DEEPSEEK_MODELS = ['deepseek-chat']
 
 type RewriteResult = {
   title: string
@@ -109,8 +109,8 @@ Conteúdo:
 ${originalBody.slice(0, 5000)}`
 }
 
-async function callGroq(prompt: string, key: string, model: string): Promise<any> {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+async function callDeepSeek(prompt: string, key: string, model: string): Promise<any> {
+  const res = await fetch('https://api.deepseek.com/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${key}`,
@@ -128,7 +128,7 @@ async function callGroq(prompt: string, key: string, model: string): Promise<any
   if (!res.ok) {
     const err = await res.text()
     if (res.status === 429) throw new Error('QUOTA_EXCEEDED')
-    throw new Error(`Groq API error ${res.status}: ${err.slice(0, 200)}`)
+    throw new Error(`DeepSeek API error ${res.status}: ${err.slice(0, 200)}`)
   }
 
   return res.json()
@@ -146,8 +146,8 @@ function extractJson(raw: string): any {
 }
 
 export async function rewriteArticle(url: string, instructions = ''): Promise<RewriteResult> {
-  const key = GROQ_API_KEY()
-  if (!key) throw new Error('GROQ_API_KEY não configurada no servidor')
+  const key = DEEPSEEK_API_KEY()
+  if (!key) throw new Error('DEEPSEEK_API_KEY não configurada no servidor')
 
   const { title, body, imageUrl } = await extractArticle(url)
   if (!body) throw new Error('Não foi possível extrair o conteúdo do artigo')
@@ -155,11 +155,11 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
   const prompt = buildPrompt(title, body, instructions)
 
   let lastError = ''
-  for (const model of GROQ_MODELS) {
+  for (const model of DEEPSEEK_MODELS) {
     for (let attempt = 0; attempt < 2; attempt++) {
       if (attempt > 0) await sleep(2000)
       try {
-        const data = await callGroq(prompt, key, model)
+        const data = await callDeepSeek(prompt, key, model)
         const raw = data?.choices?.[0]?.message?.content || ''
         if (!raw) throw new Error('Resposta vazia da IA')
 
@@ -174,7 +174,7 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         if (msg === 'QUOTA_EXCEEDED') {
-          lastError = `Cota excedida no modelo ${model}. ${model === GROQ_MODELS[GROQ_MODELS.length - 1] ? 'Cota gratuita diária esgotada no Groq. Aguarde ou crie outra conta em console.groq.com.' : 'Tentando próximo modelo...'}`
+          lastError = `Cota excedida no modelo ${model}. ${model === DEEPSEEK_MODELS[DEEPSEEK_MODELS.length - 1] ? 'Cota gratuita esgotada no DeepSeek. Crie uma nova chave em platform.deepseek.com/api_keys.' : 'Tentando próximo modelo...'}`
           await sleep(1000)
           break
         }
