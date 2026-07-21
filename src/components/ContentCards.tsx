@@ -62,6 +62,25 @@ export const NewsCard = memo(function NewsCard({ item }: { item: ContentCard }) 
   )
 })
 
+export const BlogCard = memo(function BlogCard({ item }: { item: ContentCard }) {
+  return (
+    <article className="blog-card">
+      {item.imageUrl ? <img className="blog-card-image" src={item.imageUrl} alt={item.title} loading="lazy" /> : null}
+      <div className="blog-card-body">
+        <p className="card-eyebrow">{item.category}</p>
+        {item.programLabel ? <span className="news-program-tag">{item.programLabel}</span> : null}
+        <h3>{item.title}</h3>
+        <p className="blog-card-desc">{item.description}</p>
+        <div className="news-card-meta">
+          {item.author ? <span>{item.author}</span> : null}
+          {item.publishedAt ? <span>{item.publishedAt}</span> : null}
+          <span>{item.meta}</span>
+        </div>
+      </div>
+    </article>
+  )
+})
+
 export const SportsCard = memo(function SportsCard({ item }: { item: ContentCard }) {
   return (
     <article className="sport-card">

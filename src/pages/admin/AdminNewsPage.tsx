@@ -213,11 +213,21 @@ export function AdminNewsPage() {
           <div className="admin-form-grid">
             <label>
               Categoria
-              <input
+              <select
                 onChange={(event) => updateForm('category', event.target.value)}
-                placeholder="Cidade, Comunidade, Serviço..."
                 value={form.category}
-              />
+              >
+                <option value="Cidade">Cidade</option>
+                <option value="Política">Política</option>
+                <option value="Cultura">Cultura</option>
+                <option value="Economia">Economia</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Educação">Educação</option>
+                <option value="Utilidade Pública">Utilidade Pública</option>
+                <option value="Esporte Local">Esporte Local</option>
+                <option value="Esporte Nacional">Esporte Nacional</option>
+                <option value="Esporte Internacional">Esporte Internacional</option>
+              </select>
             </label>
 
             <label>

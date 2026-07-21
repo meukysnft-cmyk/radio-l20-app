@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   FeaturedNewsCard,
   NewsCard,
+  BlogCard,
   ScheduleCard,
   SectionHeader,
 } from '../components/ContentCards'
@@ -155,10 +156,10 @@ export function HomePage() {
                 ))}
               </div>
             </div>
-            <div className="news-grid">
+            <div className="news-grid blog-grid">
               {moreNews.slice(3).map((item) => (
                 <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
-                  <NewsCard item={item.card} />
+                  <BlogCard item={item.card} />
                 </Link>
               ))}
             </div>
@@ -186,10 +187,10 @@ export function HomePage() {
               Ver esportes
             </Link>
           </div>
-          <div className="news-grid">
+          <div className="news-grid blog-grid">
             {sportNews.slice(0, 4).map((item) => (
               <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
-                <NewsCard item={toNewsCard(item)} />
+                <BlogCard item={toNewsCard(item)} />
               </Link>
             ))}
           </div>

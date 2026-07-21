@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { NewsCard } from '../components/ContentCards'
+import { BlogCard } from '../components/ContentCards'
 import { radioRoutes } from '../config/radioLinks'
 import { SPORTS } from '../data/sportsData'
 import { FootballTables } from '../components/FootballTables'
@@ -97,13 +97,13 @@ export function SportsPage() {
           {sportNews.filter((n) => n.category === 'Esporte Local').length > 0 ? (
             <div className="sport-news-section">
               <h2 className="section-title">Notícias do Esporte Local</h2>
-              <div className="news-grid">
+              <div className="news-grid blog-grid">
                 {sportNews
                   .filter((n) => n.category === 'Esporte Local')
                   .slice(0, 6)
                   .map((item) => (
                     <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
-                      <NewsCard item={toNewsCard(item)} />
+                      <BlogCard item={toNewsCard(item)} />
                     </Link>
                   ))}
               </div>
@@ -119,13 +119,13 @@ export function SportsPage() {
           {sportNews.filter((n) => n.category === 'Esporte Nacional').length > 0 ? (
             <div className="sport-news-section">
               <h2 className="section-title">Notícias do Esporte Nacional</h2>
-              <div className="news-grid">
+              <div className="news-grid blog-grid">
                 {sportNews
                   .filter((n) => n.category === 'Esporte Nacional')
                   .slice(0, 6)
                   .map((item) => (
                     <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
-                      <NewsCard item={toNewsCard(item)} />
+                      <BlogCard item={toNewsCard(item)} />
                     </Link>
                   ))}
               </div>
@@ -141,13 +141,13 @@ export function SportsPage() {
           {sportNews.filter((n) => n.category === 'Esporte Internacional').length > 0 ? (
             <div className="sport-news-section">
               <h2 className="section-title">Notícias do Esporte Internacional</h2>
-              <div className="news-grid">
+              <div className="news-grid blog-grid">
                 {sportNews
                   .filter((n) => n.category === 'Esporte Internacional')
                   .slice(0, 6)
                   .map((item) => (
                     <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
-                      <NewsCard item={toNewsCard(item)} />
+                      <BlogCard item={toNewsCard(item)} />
                     </Link>
                   ))}
               </div>

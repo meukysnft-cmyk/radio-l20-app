@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { FeaturedNewsCard, NewsCard, SectionHeader } from '../components/ContentCards'
+import { FeaturedNewsCard, NewsCard, BlogCard, SectionHeader } from '../components/ContentCards'
 import { Link, useSearchParams } from 'react-router-dom'
 import { radioRoutes } from '../config/radioLinks'
 import { getProgramLabelBySlug } from '../data/programsContent'
@@ -197,13 +197,11 @@ export function NewsPage() {
             </div>
           </div>
 
-          <div className="news-grid">
+          <div className="news-grid blog-grid">
             {paginatedNews.slice(1).map((item) => (
-              <div className="news-card-wrap" key={item.id}>
-                <Link className="news-card-link" to={`/noticias/${item.id}`}>
-                  <NewsCard item={item.card} />
-                </Link>
-              </div>
+              <Link className="news-card-link" key={item.id} to={`/noticias/${item.id}`}>
+                <BlogCard item={item.card} />
+              </Link>
             ))}
           </div>
 
