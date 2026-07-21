@@ -205,7 +205,8 @@
 .ft-na { color: var(--text-muted); font-size: .7rem; }
 .ft-legend { display: flex; gap: 14px; padding: 8px 12px; border-top: 1px solid var(--line); font-size: .7rem; color: var(--text-muted); }
 .ft-legend .ft-dot { width: 14px; height: 14px; border-radius: 3px; margin-right: 4px; font-size: 0; }
-.ft-footer { margin: 8px 0 0; color: var(--text-muted); font-size: .7rem; text-align: right; }
+.ft-news-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.ft-news-grid .news-card { margin: 0; }
 .ft-grupos-classif{padding:12px;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface)}
 .ft-grupos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
 .ft-grupo-block{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-deep);overflow:hidden}

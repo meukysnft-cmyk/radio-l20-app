@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
-import type { LeagueTable, GroupData } from '../types/content'
+import { Link } from 'react-router-dom'
+import type { LeagueTable, GroupData, NewsDocument } from '../types/content'
+import type { ContentCard } from '../data/siteContent'
 import { fetchLeagueTables } from '../services/footballApi'
+import { subscribeDocuments } from '../services/firestoreService'
+import { NewsCard } from './ContentCards'
 import { LibertadoresBracket } from './LibertadoresBracket'
 
 const LEAGUE_CARD: Record<string, { label: string; icon: string }> = {
@@ -58,7 +62,7 @@ function ResultDot({ result }: { result: string }) {
   return <span className="ft-dot" style={{ background: color }}>{result}</span>
 }
 
-type SubTab = 'grupos' | 'chaveamento' | 'artilharia'
+type SubTab = 'grupos' | 'chaveamento' | 'artilharia' | 'noticias'
 
 export function FootballTables({ slugs }: { slugs?: string[] }) {
   const [tables, setTables] = useState<LeagueTable[]>([])
@@ -66,6 +70,15 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
   const [subTab, setSubTab] = useState<SubTab>('chaveamento')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [news, setNews] = useState<NewsDocument[]>([])
+
+  useEffect(() => {
+    return subscribeDocuments<NewsDocument>('news', (docs) => {
+      setNews(
+        docs.filter(d => d.status === 'published' && d.category.toLowerCase().includes('libertadores'))
+      )
+    })
+  }, [])
 
   useEffect(() => {
     fetchLeagueTables()
@@ -143,6 +156,13 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
               type="button"
             >
               Artilharia
+            </button>
+            <button
+              className={`ft-tab${subTab === 'noticias' ? ' is-active' : ''}`}
+              onClick={() => setSubTab('noticias')}
+              type="button"
+            >
+              Notícias
             </button>
           </div>
 
@@ -223,7 +243,32 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
                 Dados de artilharia indisponíveis no momento.
               </p>
             )
-          ) : (
+            ) : subTab === 'noticias' ? (
+              <div className="ft-news-grid">
+                {news.length > 0 ? (
+                  news.map(item => (
+                    <NewsCard key={item.id} item={{
+                      category: item.category || 'Libertadores',
+                      title: item.title,
+                      description: item.excerpt || item.content || '',
+                      meta: item.author || 'Rádio L20',
+                      author: item.author || 'Rádio L20',
+                      imageUrl: item.imageUrl || '',
+                      publishedAt: (() => {
+                        const d = item.createdAt as any
+                        if (!d || !d.seconds) return ''
+                        return new Date(d.seconds * 1000).toLocaleDateString('pt-BR')
+                      })(),
+                      isTemporary: false,
+                    }} />
+                  ))
+                ) : (
+                  <p className="ft-na" style={{ textAlign: 'center', padding: 24 }}>
+                    Nenhuma notícia da Libertadores encontrada.
+                  </p>
+                )}
+              </div>
+            ) : (
             <LibertadoresBracket data={active} />
           )}
         </>
@@ -302,8 +347,6 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
       ) : (
         <p className="ft-na">Dados indisponíveis para este campeonato no momento.</p>
       )}
-
-      <p className="ft-footer">Fonte: GE.com &middot; Atualizado automaticamente a cada 30 min</p>
     </div>
   )
 }
