@@ -1,6 +1,5 @@
-const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY || ''
-const GEMINI_MODELS = ['gemini-2.0-flash-lite', 'gemini-2.0-flash']
-const GEMINI_API_VERSION = 'v1'
+const GROQ_API_KEY = () => process.env.GROQ_API_KEY || ''
+const GROQ_MODELS = ['llama-3.1-70b-versatile', 'llama-3.1-8b-instant']
 
 type RewriteResult = {
   title: string
@@ -90,7 +89,7 @@ async function extractArticle(url: string): Promise<{ title: string; body: strin
 function buildPrompt(originalTitle: string, originalBody: string, instructions: string): string {
   return `Você é um redator de notícias da Rádio L20, uma rádio comunitária de Pilar, Alagoas.
 
-Reescreva a notícia abaixo em português brasileiro, em tom jornalístico e acessível. 
+Reescreva a notícia abaixo em português brasileiro, em tom jornalístico e acessível.
 Mude a estrutura dos parágrafos, o vocabulário e a ordem das informações, mas mantenha todos os fatos, nomes, números, citações e dados exatos.
 Adicione um parágrafo de contexto local ("Em Pilar, AL...") se fizer sentido.
 O resultado deve ser original e evitar plágio textual.
@@ -110,24 +109,26 @@ Conteúdo:
 ${originalBody.slice(0, 5000)}`
 }
 
-async function callGemini(prompt: string, key: string, model: string): Promise<any> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${model}:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
-      }),
-      signal: AbortSignal.timeout(30_000),
+async function callGroq(prompt: string, key: string, model: string): Promise<any> {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'application/json',
     },
-  )
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 4096,
+    }),
+    signal: AbortSignal.timeout(30_000),
+  })
 
   if (!res.ok) {
     const err = await res.text()
     if (res.status === 429) throw new Error('QUOTA_EXCEEDED')
-    throw new Error(`Gemini API error ${res.status}: ${err.slice(0, 200)}`)
+    throw new Error(`Groq API error ${res.status}: ${err.slice(0, 200)}`)
   }
 
   return res.json()
@@ -137,9 +138,16 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms))
 }
 
+function extractJson(raw: string): any {
+  const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*$/g, '').trim()
+  const match = cleaned.match(/\{[\s\S]*\}/)
+  if (!match) throw new Error('Formato inválido na resposta da IA')
+  return JSON.parse(match[0])
+}
+
 export async function rewriteArticle(url: string, instructions = ''): Promise<RewriteResult> {
-  const key = GEMINI_API_KEY()
-  if (!key) throw new Error('GEMINI_API_KEY não configurada no servidor')
+  const key = GROQ_API_KEY()
+  if (!key) throw new Error('GROQ_API_KEY não configurada no servidor')
 
   const { title, body, imageUrl } = await extractArticle(url)
   if (!body) throw new Error('Não foi possível extrair o conteúdo do artigo')
@@ -147,18 +155,15 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
   const prompt = buildPrompt(title, body, instructions)
 
   let lastError = ''
-  for (const model of GEMINI_MODELS) {
+  for (const model of GROQ_MODELS) {
     for (let attempt = 0; attempt < 2; attempt++) {
       if (attempt > 0) await sleep(2000)
       try {
-        const data = await callGemini(prompt, key, model)
-        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
+        const data = await callGroq(prompt, key, model)
+        const raw = data?.choices?.[0]?.message?.content || ''
         if (!raw) throw new Error('Resposta vazia da IA')
 
-        const jsonMatch = raw.replace(/```json\s*/gi, '').replace(/```\s*$/g, '').match(/\{[\s\S]*\}/)
-        if (!jsonMatch) throw new Error('Formato inválido na resposta da IA')
-
-        const parsed = JSON.parse(jsonMatch[0])
+        const parsed = extractJson(raw)
         return {
           title: parsed.title || title,
           content: parsed.content || '',
@@ -169,7 +174,7 @@ export async function rewriteArticle(url: string, instructions = ''): Promise<Re
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         if (msg === 'QUOTA_EXCEEDED') {
-          lastError = `Cota excedida no modelo ${model}. ${model === GEMINI_MODELS[GEMINI_MODELS.length - 1] ? 'Cota gratuita diária esgotada. Acesse https://aistudio.google.com/apikey e ative faturamento (com limite) para continuar usando, ou aguarde até o reset (24h).' : `Tentando próximo modelo...`}`
+          lastError = `Cota excedida no modelo ${model}. ${model === GROQ_MODELS[GROQ_MODELS.length - 1] ? 'Cota gratuita diária esgotada no Groq. Aguarde ou crie outra conta em console.groq.com.' : 'Tentando próximo modelo...'}`
           await sleep(1000)
           break
         }
