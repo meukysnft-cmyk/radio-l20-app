@@ -118,46 +118,36 @@
 
 /* ── Libertadores Bracket ── */
 .lb-wrap{overflow-x:auto;padding:4px 0}
-.lb-grid{display:grid;gap:0}
-.lb-col-title{text-align:center;font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold-dark,var(--text-muted));font-weight:700;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:4px}
-.lb-node{border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface);padding:6px 8px;display:flex;align-items:center;font-size:.72rem;transition:.15s}
-.lb-node-empty{background:transparent;border-color:transparent;justify-content:center}
-.lb-node-empty .lb-node-inner{color:var(--text-muted);font-style:italic;font-size:.68rem}
-.lb-node-played{border-color:var(--gold-dark,var(--brand))}
-.lb-node-inner{width:100%;display:grid;gap:2px}
-.lb-inner{display:grid;gap:3px;width:100%}
-/* Bracket */
-.lb-wrap{overflow-x:auto;padding:4px 0}
-.lb-grid{display:grid;gap:0;min-width:520px}
-.lb-col-title{font-size:.75rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;background:rgba(255,255,255,.03);border-radius:4px 4px 0 0;text-align:center}
-.lb-node{background:var(--bg2,#1a1d23);border:1px solid var(--gold-dark,#333);border-radius:6px;padding:6px 8px;display:flex;align-items:center}
-.lb-node-played{border-color:var(--gold-light,#c9a84c)}
-.lb-node-empty{background:transparent;border:1px dashed var(--text-faint,#333);justify-content:center;color:var(--text-faint,#555);font-size:.7rem}
+.lb-grid{display:grid;gap:0;min-width:700px}
+.lb-col-title{font-size:.85rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.5px;padding:8px 14px;background:var(--surface-deep);border-radius:6px 6px 0 0;text-align:center;border-bottom:1px solid var(--line)}
+.lb-node{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;display:flex;align-items:center}
+.lb-node-played{border-color:var(--brand)}
+.lb-node-empty{background:transparent;border:1px dashed var(--line);justify-content:center;color:var(--text-muted);font-size:.78rem}
 .lb-node-inner{text-align:center;width:100%}
-.lb-inner{width:100%}
-.lb-game{display:grid;grid-template-columns:48px 20px 1fr 22px 8px 22px 1fr 20px;gap:3px;align-items:center;line-height:1.4;padding:2px 0}
-.lb-game+.lb-game{border-top:1px solid var(--border-faint,rgba(255,255,255,.06));padding-top:4px;margin-top:2px}
-.lb-gdate{font-size:.7rem;color:var(--text-muted);text-align:left}
-.lb-glogo{width:18px;height:18px;object-fit:contain}
-.lb-gteam{font-size:.72rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-inner{width:100%;display:grid;gap:4px}
+.lb-game{display:grid;grid-template-columns:56px 24px 1fr 26px 10px 26px 1fr 24px;gap:4px;align-items:center;line-height:1.5;padding:4px 0}
+.lb-game+.lb-game{border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+.lb-gdate{font-size:.8rem;color:var(--text-muted);text-align:left;white-space:nowrap}
+.lb-glogo{width:22px;height:22px;object-fit:contain}
+.lb-gteam{font-size:.82rem;color:var(--text);white-space:nowrap}
 .lb-gteam-bold{font-weight:700;color:var(--text-strong)}
-.lb-gscore{font-size:.72rem;color:var(--text-muted);text-align:center;font-weight:600}
-.lb-gscore-bold{font-weight:700;color:var(--text-strong)}
-.lb-gx{font-size:.6rem;color:var(--text-muted);text-align:center}
-.lb-agg{font-size:.65rem;color:var(--gold-light,var(--brand-bright));text-align:center;font-weight:600;margin-top:2px;letter-spacing:.3px}
-.lb-conn{position:relative;border-right:3px solid var(--gold-dark,var(--brand))}
-.lb-conn::before,.lb-conn::after{content:'';position:absolute;left:0;width:50%;height:3px;background:var(--gold-dark,var(--brand))}
+.lb-gscore{font-size:.8rem;color:var(--text);text-align:center;font-weight:600}
+.lb-gscore-bold{font-weight:800;color:var(--text-strong)}
+.lb-gx{font-size:.68rem;color:var(--text-muted);text-align:center}
+.lb-agg{font-size:.72rem;color:var(--brand-bright);text-align:center;font-weight:600;margin-top:3px;letter-spacing:.3px}
+.lb-conn{position:relative;border-right:3px solid var(--brand)}
+.lb-conn::before,.lb-conn::after{content:'';position:absolute;left:0;width:50%;height:3px;background:var(--brand)}
 .lb-conn::before{top:33%}
 .lb-conn::after{top:66%}
 
 @media (max-width:640px){
-  .lb-game{grid-template-columns:38px 16px 1fr 18px 6px 18px 1fr 16px}
-  .lb-glogo{width:14px;height:14px}
-  .lb-gteam{font-size:.65rem}
-  .lb-gscore{font-size:.65rem}
-  .lb-gdate{font-size:.62rem}
-  .lb-node{padding:4px 6px}
-  .lb-col-title{font-size:.68rem}
+  .lb-game{grid-template-columns:44px 18px 1fr 20px 6px 20px 1fr 18px}
+  .lb-glogo{width:18px;height:18px}
+  .lb-gteam{font-size:.72rem}
+  .lb-gscore{font-size:.72rem}
+  .lb-gdate{font-size:.68rem}
+  .lb-node{padding:6px 8px}
+  .lb-col-title{font-size:.72rem}
 }
 
 /* ── Artilharia ── */

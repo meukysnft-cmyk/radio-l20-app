@@ -265,6 +265,39 @@ function buildLogoMap(chaves: { home: string; homeLogo: string; away: string; aw
 const OPTA_BASE = 'https://api.performfeeds.com/soccerdata/standings/a5oqwilhwzb2174uel4v42sus'
 const OPTA_TOURNAMENT_ID = 'dk8bg66qizwked9etonwaaln8'
 
+const wikiLogoCache = new Map<string, string | null>()
+
+const WIKI_UA = 'RadioL20App/1.0 (https://canal-l20.web.app; contato@radiol20.com.br)'
+
+async function wikiSearchTeam(name: string): Promise<string | null> {
+  const norm = name.toLowerCase().trim()
+  if (wikiLogoCache.has(norm)) return wikiLogoCache.get(norm) ?? null
+  try {
+    const searchUrl = 'https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=' +
+      encodeURIComponent(name + ' futebol') + '&format=json&srlimit=1'
+    const res = await fetch(searchUrl, {
+      headers: { 'User-Agent': WIKI_UA },
+      signal: AbortSignal.timeout(6000),
+    })
+    if (!res.ok) { wikiLogoCache.set(norm, null); return null }
+    const data = await res.json() as any
+    const title = data.query?.search?.[0]?.title
+    if (!title) { wikiLogoCache.set(norm, null); return null }
+    const sumRes = await fetch('https://pt.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title), {
+      headers: { 'User-Agent': WIKI_UA },
+      signal: AbortSignal.timeout(6000),
+    })
+    if (!sumRes.ok) { wikiLogoCache.set(norm, null); return null }
+    const sum = await sumRes.json() as any
+    const url: string | undefined = sum.thumbnail?.source
+    wikiLogoCache.set(norm, url || null)
+    return url || null
+  } catch {
+    wikiLogoCache.set(norm, null)
+    return null
+  }
+}
+
 async function fetchGroupsFromOpta(logoMap?: Record<string, string>): Promise<GroupData[]> {
   try {
     const url = `${OPTA_BASE}?_rt=c&_fmt=json&_lcl=pt-br&tmcl=${OPTA_TOURNAMENT_ID}&type=total`
@@ -279,11 +312,13 @@ async function fetchGroupsFromOpta(logoMap?: Record<string, string>): Promise<Gr
     const json = await res.json()
     const stage = json.stage?.[0]
     if (!stage?.division) return []
-    return stage.division.map((div: any) => ({
+    const teams: { name: string; key: string }[] = []
+    const groupsData = stage.division.map((div: any) => ({
       name: div.groupName || '',
       teams: (div.ranking || []).map((r: any) => {
         const name = r.contestantClubName || r.contestantName || ''
         const key = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        teams.push({ name, key })
         return {
           pos: r.rank ?? 0,
           name,
@@ -301,6 +336,24 @@ async function fetchGroupsFromOpta(logoMap?: Record<string, string>): Promise<Gr
         }
       }),
     }))
+    const missing = teams.filter(t => !logoMap?.[t.key]).map(t => t.name)
+    if (missing.length) {
+      const wikiLogos = await Promise.allSettled(missing.map(name => wikiSearchTeam(name)))
+      const wikiMap: Record<string, string> = {}
+      wikiLogos.forEach((r, i) => {
+        if (r.status === 'fulfilled' && r.value) {
+          const key = missing[i].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          wikiMap[key] = r.value
+        }
+      })
+      for (const div of groupsData) {
+        for (const t of div.teams) {
+          const key = t.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          if (!t.logo && wikiMap[key]) t.logo = wikiMap[key]
+        }
+      }
+    }
+    return groupsData
   } catch {
     return []
   }
