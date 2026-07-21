@@ -14,6 +14,7 @@ export type NewsFormState = {
   title: string
   excerpt: string
   category: string
+  section: 'general' | 'sports'
   author: string
   content: string
   imageUrl: string
@@ -26,6 +27,7 @@ export const emptyNewsForm: NewsFormState = {
   title: '',
   excerpt: '',
   category: 'Cidade',
+  section: 'general',
   author: '',
   content: '',
   imageUrl: '',
@@ -55,6 +57,7 @@ export function NewsAdminPanel({
           title: editingItem.title || '',
           excerpt: editingItem.excerpt || '',
           category: editingItem.category || 'Cidade',
+          section: editingItem.section || 'general',
           author: editingItem.author || '',
           content: editingItem.content || '',
           imageUrl: editingItem.imageUrl || '',
@@ -87,6 +90,7 @@ export function NewsAdminPanel({
       title: form.title.trim(),
       excerpt: form.excerpt.trim(),
       category: form.category.trim(),
+      section: form.section,
       author: form.author.trim(),
       content: form.content.trim(),
       imageUrl: form.imageUrl.trim(),
@@ -166,6 +170,15 @@ export function NewsAdminPanel({
               <option value="draft">Rascunho</option>
               <option value="published">Publicado</option>
               <option value="archived">Arquivado</option>
+            </select>
+          </label>
+        </div>
+        <div className="admin-form-grid">
+          <label>
+            Seção
+            <select value={form.section} onChange={(e) => updateForm('section', e.target.value as 'general' | 'sports')}>
+              <option value="general">Notícia Geral</option>
+              <option value="sports">Notícia Esportiva</option>
             </select>
           </label>
         </div>

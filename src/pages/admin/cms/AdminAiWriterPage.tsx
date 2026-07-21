@@ -29,6 +29,7 @@ export function AdminAiWriterPage() {
   const [errorMessage, setErrorMessage] = useState('')
 
   const [publishCategory, setPublishCategory] = useState('Cidade')
+  const [publishSection, setPublishSection] = useState<'general' | 'sports'>('general')
   const [publishProgram, setPublishProgram] = useState('')
   const [isPublishing, setIsPublishing] = useState(false)
   const [publishFeedback, setPublishFeedback] = useState('')
@@ -71,6 +72,7 @@ export function AdminAiWriterPage() {
         excerpt: result.excerpt,
         imageUrl: result.imageUrl,
         category: publishCategory,
+        section: publishSection,
         programSlug: publishProgram || null,
         author: 'Rádio L20',
         sourceUrl: result.sourceUrl,
@@ -135,6 +137,13 @@ export function AdminAiWriterPage() {
               </select>
             </label>
 
+            <label>Seção
+              <select value={publishSection} onChange={(e) => setPublishSection(e.target.value as 'general' | 'sports')}>
+                <option value="general">Notícia Geral</option>
+                <option value="sports">Notícia Esportiva</option>
+              </select>
+            </label>
+
             <label>Programa (opcional)
               <input
                 type="text"
@@ -191,10 +200,16 @@ export function AdminAiWriterPage() {
                 Fonte original: <a href={result.sourceUrl} target="_blank" rel="noopener noreferrer">{result.sourceUrl}</a>
               </p>
 
-              <div className="cms-form-row">
-                <label>Categoria
+              <div className="cms-form-row" style={{ display: 'flex', gap: 12 }}>
+                <label style={{ flex: 1 }}>Categoria
                   <select value={publishCategory} onChange={(e) => setPublishCategory(e.target.value)}>
                     {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </label>
+                <label style={{ flex: 1 }}>Seção
+                  <select value={publishSection} onChange={(e) => setPublishSection(e.target.value as 'general' | 'sports')}>
+                    <option value="general">Notícia Geral</option>
+                    <option value="sports">Notícia Esportiva</option>
                   </select>
                 </label>
                 <label>Programa

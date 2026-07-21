@@ -37,6 +37,7 @@ export type NewsDocument = FirestoreMeta & {
   title: string
   excerpt: string
   category: string
+  section: 'general' | 'sports'
   author: string
   content: string
   imageUrl: string

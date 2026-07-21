@@ -1,3 +1,50 @@
+.news-section-toggle {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.news-section-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border: 2px solid var(--line);
+  border-radius: 100px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.news-section-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.news-section-btn.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.news-section-icon { font-size: 1.3rem; }
+
+.news-page-sports {
+  --section-accent: #2e7d32;
+}
+.news-page-sports .news-section-btn.is-active {
+  background: var(--section-accent);
+  border-color: var(--section-accent);
+}
+.news-page-sports .news-section-btn:hover {
+  border-color: var(--section-accent);
+  color: var(--section-accent);
+}
+.news-page-sports .news-category-tab.is-active {
+  background: var(--section-accent);
+  border-color: var(--section-accent);
+}
+
 .home-quick-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
 .home-quick-grid-3 { grid-template-columns: 1fr; }
 @media (min-width: 600px) { .home-quick-grid-3 { grid-template-columns: repeat(3, 1fr); } }

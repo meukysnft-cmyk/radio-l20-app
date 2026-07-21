@@ -13,7 +13,7 @@ type NewsWithCard = {
   card: ContentCard
 }
 
-const fallbackFeaturedNews: ContentCard = {
+const fallbackGeneralFeatured: ContentCard = {
   category: 'Cidade',
   title: 'Cobertura local em destaque',
   description:
@@ -22,9 +22,16 @@ const fallbackFeaturedNews: ContentCard = {
   isTemporary: false,
 }
 
-const SPORT_CATEGORIES = ['Esporte Local', 'Esporte Nacional', 'Esporte Internacional']
+const fallbackSportsFeatured: ContentCard = {
+  category: 'Esporte Local',
+  title: 'Esporte local em destaque',
+  description:
+    'Acompanhe as principais notícias esportivas de Pilar e região.',
+  meta: 'Pilar, AL',
+  isTemporary: false,
+}
 
-const CATEGORIES = [
+const GENERAL_CATEGORIES = [
   'Todas',
   'Cidade',
   'Política',
@@ -33,6 +40,13 @@ const CATEGORIES = [
   'Saúde',
   'Educação',
   'Utilidade Pública',
+]
+
+const SPORTS_CATEGORIES = [
+  'Todas',
+  'Esporte Local',
+  'Esporte Nacional',
+  'Esporte Internacional',
 ]
 
 const ITEMS_PER_PAGE = 12
@@ -72,8 +86,14 @@ export function NewsPage() {
   const selectedProgramSlug = searchParams.get('program') ?? ''
   const selectedProgramLabel = getProgramLabelBySlug(selectedProgramSlug)
 
+  const [section, setSection] = useState<'general' | 'sports'>('general')
   const [activeCategory, setActiveCategory] = useState('Todas')
   const [currentPage, setCurrentPage] = useState(1)
+
+  const isGeneral = section === 'general'
+  const categories = isGeneral ? GENERAL_CATEGORIES : SPORTS_CATEGORIES
+  const fallbackFeatured = isGeneral ? fallbackGeneralFeatured : fallbackSportsFeatured
+  const sectionClass = isGeneral ? 'news-page-general' : 'news-page-sports'
 
   useEffect(() => {
     return subscribeDocuments<NewsDocument>(
@@ -101,14 +121,12 @@ export function NewsPage() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [activeCategory, selectedProgramSlug])
+  }, [activeCategory, selectedProgramSlug, section])
 
   const visibleNewsItems = useMemo(() => {
     let filtered = newsItems
 
-    if (!selectedProgramSlug) {
-      filtered = filtered.filter((item) => !SPORT_CATEGORIES.includes(item.category || ''))
-    }
+    filtered = filtered.filter((item) => (item.section || 'general') === section)
 
     if (selectedProgramSlug) {
       filtered = filtered.filter((item) => item.programSlug === selectedProgramSlug)
@@ -119,12 +137,12 @@ export function NewsPage() {
     }
 
     return filtered
-  }, [newsItems, activeCategory, selectedProgramSlug])
+  }, [newsItems, section, activeCategory, selectedProgramSlug])
 
   const featuredNews = useMemo(() => {
     const topNews = visibleNewsItems[0]
-    return topNews ? toNewsCard(topNews) : fallbackFeaturedNews
-  }, [visibleNewsItems])
+    return topNews ? toNewsCard(topNews) : fallbackFeatured
+  }, [visibleNewsItems, fallbackFeatured])
 
   const featuredNewsLink = visibleNewsItems[0] ? `/noticias/${visibleNewsItems[0].id}` : radioRoutes.news
 
@@ -143,7 +161,7 @@ export function NewsPage() {
   }
 
   return (
-    <section className="content-section page-section">
+    <section className={`content-section page-section ${sectionClass}`}>
       <SectionHeader
         eyebrow={content.sections.news.eyebrow}
         title={selectedProgramLabel ? `Notícias de ${selectedProgramLabel}` : content.sections.news.title}
@@ -153,6 +171,25 @@ export function NewsPage() {
             : content.sections.news.description
         }
       />
+
+      <div className="news-section-toggle">
+        <button
+          type="button"
+          className={`news-section-btn${isGeneral ? ' is-active' : ''}`}
+          onClick={() => { setSection('general'); setActiveCategory('Todas') }}
+        >
+          <span className="news-section-icon">&#128240;</span>
+          Notícias Gerais
+        </button>
+        <button
+          type="button"
+          className={`news-section-btn${!isGeneral ? ' is-active' : ''}`}
+          onClick={() => { setSection('sports'); setActiveCategory('Todas') }}
+        >
+          <span className="news-section-icon">&#9917;</span>
+          Notícias Esportivas
+        </button>
+      </div>
 
       {selectedProgramLabel ? (
         <div className="program-news-filter-bar">
@@ -165,7 +202,7 @@ export function NewsPage() {
         </div>
       ) : (
         <div className="news-category-tabs">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               type="button"
@@ -245,7 +282,9 @@ export function NewsPage() {
               ? `Ainda não há notícias na categoria "${activeCategory}".`
               : selectedProgramLabel
                 ? 'Ainda não há notícias associadas a este programa.'
-                : 'Ainda não há notícias publicadas para mostrar nesta seção.'}
+                : isGeneral
+                  ? 'Ainda não há notícias gerais publicadas.'
+                  : 'Ainda não há notícias esportivas publicadas.'}
           </p>
           {activeCategory !== 'Todas' ? (
             <button type="button" className="advertise-secondary" onClick={() => setActiveCategory('Todas')}>

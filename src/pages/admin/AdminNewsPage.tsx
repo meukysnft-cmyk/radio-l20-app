@@ -15,6 +15,7 @@ type NewsFormState = {
   title: string
   excerpt: string
   category: string
+  section: 'general' | 'sports'
   author: string
   content: string
   imageUrl: string
@@ -27,6 +28,7 @@ const emptyNewsForm: NewsFormState = {
   title: '',
   excerpt: '',
   category: 'Cidade',
+  section: 'general',
   author: '',
   content: '',
   imageUrl: '',
@@ -107,6 +109,7 @@ export function AdminNewsPage() {
       title: form.title.trim(),
       excerpt: form.excerpt.trim(),
       category: form.category.trim(),
+      section: form.section,
       author: form.author.trim(),
       content: form.content.trim(),
       imageUrl: form.imageUrl.trim(),
@@ -146,6 +149,7 @@ export function AdminNewsPage() {
       title: item.title || '',
       excerpt: item.excerpt || '',
       category: item.category || 'Cidade',
+      section: item.section || 'general',
       author: item.author || '',
       content: item.content || '',
       imageUrl: item.imageUrl || '',
@@ -240,17 +244,29 @@ export function AdminNewsPage() {
             </label>
           </div>
 
-          <label>
-            Status
-            <select
-              onChange={(event) => updateForm('status', event.target.value as ContentStatus)}
-              value={form.status}
-            >
-              <option value="draft">Rascunho</option>
-              <option value="published">Publicado</option>
-              <option value="archived">Arquivado</option>
-            </select>
-          </label>
+          <div className="admin-form-grid">
+            <label>
+              Seção
+              <select
+                onChange={(event) => updateForm('section', event.target.value as 'general' | 'sports')}
+                value={form.section}
+              >
+                <option value="general">Notícia Geral</option>
+                <option value="sports">Notícia Esportiva</option>
+              </select>
+            </label>
+            <label>
+              Status
+              <select
+                onChange={(event) => updateForm('status', event.target.value as ContentStatus)}
+                value={form.status}
+              >
+                <option value="draft">Rascunho</option>
+                <option value="published">Publicado</option>
+                <option value="archived">Arquivado</option>
+              </select>
+            </label>
+          </div>
 
           <label>
             Link da imagem
