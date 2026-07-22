@@ -35,15 +35,19 @@ export type FirestoreMeta = {
 
 export type NewsDocument = FirestoreMeta & {
   title: string
+  subtitle?: string
   excerpt: string
   category: string
   section: 'general' | 'sports'
   author: string
+  editor?: string
   content: string
   imageUrl: string
   programSlug?: string
   status: ContentStatus
   featured: boolean
+  tags?: string[]
+  sourceUrl?: string
 }
 
 export type ChampionshipDocument = FirestoreMeta & {
