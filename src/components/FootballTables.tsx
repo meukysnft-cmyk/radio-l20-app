@@ -247,12 +247,12 @@ export function FootballTables({ slugs }: { slugs?: string[] }) {
                   <div key={`${s.name}-${s.pos}`} className="art-row">
                     <span className="art-rank">{s.pos}</span>
                     <span className="art-player">
-                      <img src={s.photo} alt={s.name} className="art-photo" />
+                       <img src={s.photo} alt={s.name} className="art-photo" loading="lazy" />
                       <span>{s.name}</span>
                     </span>
                     <span className="art-pos">{s.position}</span>
                     <span className="art-team-cell">
-                      <img src={s.teamLogo} alt={s.team} className="art-logo" />
+                       <img src={s.teamLogo} alt={s.team} className="art-logo" loading="lazy" />
                       <span>{s.team}</span>
                     </span>
                     <span className="art-gols">{s.goals}</span>

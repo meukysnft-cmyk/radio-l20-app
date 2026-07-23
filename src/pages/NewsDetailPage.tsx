@@ -96,7 +96,7 @@ export function NewsDetailPage() {
       </div>
 
       <article className="news-detail-card">
-        {news.imageUrl ? <img className="news-detail-image" src={news.imageUrl} alt={news.title} /> : null}
+        {news.imageUrl ? <img className="news-detail-image" src={news.imageUrl} alt={news.title} loading="eager" /> : null}
         <div className="news-detail-meta">
           <span>{news.category}</span>
           {news.author ? <span>{news.author}</span> : null}

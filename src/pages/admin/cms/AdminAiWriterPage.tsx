@@ -9,6 +9,7 @@ type Step = 'form' | 'loading' | 'preview'
 
 type AiResult = {
   title: string
+  subtitle?: string
   content: string
   excerpt: string
   imageUrl: string
@@ -31,6 +32,7 @@ export function AdminAiWriterPage() {
   const [publishCategory, setPublishCategory] = useState('Cidade')
   const [publishSection, setPublishSection] = useState<'general' | 'sports'>('general')
   const [publishProgram, setPublishProgram] = useState('')
+  const [publishTags, setPublishTags] = useState('')
   const [isPublishing, setIsPublishing] = useState(false)
   const [publishFeedback, setPublishFeedback] = useState('')
 
@@ -68,14 +70,16 @@ export function AdminAiWriterPage() {
     try {
       const payload = {
         title: result.title,
+        subtitle: result.subtitle || undefined,
         content: result.content,
         excerpt: result.excerpt,
         imageUrl: result.imageUrl,
         category: publishCategory,
         section: publishSection,
-        programSlug: publishProgram || null,
+        programSlug: publishProgram || undefined,
         author: 'Rádio L20',
         sourceUrl: result.sourceUrl,
+        tags: publishTags.trim() ? publishTags.split(',').map((t) => t.trim()).filter(Boolean) : undefined,
         status: 'published',
         featured: false,
         createdAt: new Date(),
@@ -154,6 +158,16 @@ export function AdminAiWriterPage() {
               <small style={{ opacity: 0.6 }}>Slug do programa, ex: esporte-local, jornada-esportiva</small>
             </label>
 
+            <label>Tags (opcional)
+              <input
+                type="text"
+                value={publishTags}
+                onChange={(e) => setPublishTags(e.target.value)}
+                placeholder="futebol, pilar, campeonato"
+              />
+              <small style={{ opacity: 0.6 }}>Separadas por vírgula</small>
+            </label>
+
             {errorMessage && <p className="cms-alert is-error">{errorMessage}</p>}
             {feedback && <p className="cms-alert is-success">{feedback}</p>}
 
@@ -200,20 +214,23 @@ export function AdminAiWriterPage() {
                 Fonte original: <a href={result.sourceUrl} target="_blank" rel="noopener noreferrer">{result.sourceUrl}</a>
               </p>
 
-              <div className="cms-form-row" style={{ display: 'flex', gap: 12 }}>
-                <label style={{ flex: 1 }}>Categoria
+              <div className="cms-form-row" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <label style={{ flex: 1, minWidth: 140 }}>Categoria
                   <select value={publishCategory} onChange={(e) => setPublishCategory(e.target.value)}>
                     {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </label>
-                <label style={{ flex: 1 }}>Seção
+                <label style={{ flex: 1, minWidth: 140 }}>Seção
                   <select value={publishSection} onChange={(e) => setPublishSection(e.target.value as 'general' | 'sports')}>
                     <option value="general">Notícia Geral</option>
                     <option value="sports">Notícia Esportiva</option>
                   </select>
                 </label>
-                <label>Programa
+                <label style={{ flex: 1, minWidth: 140 }}>Programa
                   <input value={publishProgram} onChange={(e) => setPublishProgram(e.target.value)} placeholder="slug" />
+                </label>
+                <label style={{ flex: 1, minWidth: 140 }}>Tags
+                  <input value={publishTags} onChange={(e) => setPublishTags(e.target.value)} placeholder="futebol, pilar" />
                 </label>
               </div>
 

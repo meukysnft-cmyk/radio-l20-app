@@ -112,7 +112,7 @@ export function LibertadoresBracket({ data }: { data: LeagueTable }) {
                     <span className="lb-leg-date">{fmtDate(pair.leg1.date)}</span>
                     <div className="lb-leg-teams">
                       <div className="lb-leg-row">
-                        <img src={pair.leg1.homeLogo} alt="" className="lb-leg-logo" />
+                         <img src={pair.leg1.homeLogo} alt="" className="lb-leg-logo" loading="lazy" />
                         <span className="lb-leg-name">{pair.leg1.home}</span>
                       </div>
                       <div className="lb-leg-score">
@@ -122,7 +122,7 @@ export function LibertadoresBracket({ data }: { data: LeagueTable }) {
                       </div>
                       <div className="lb-leg-row lb-leg-row-right">
                         <span className="lb-leg-name">{pair.leg1.away}</span>
-                        <img src={pair.leg1.awayLogo} alt="" className="lb-leg-logo" />
+                         <img src={pair.leg1.awayLogo} alt="" className="lb-leg-logo" loading="lazy" />
                       </div>
                     </div>
                   </div>
@@ -130,7 +130,7 @@ export function LibertadoresBracket({ data }: { data: LeagueTable }) {
                     <span className="lb-leg-date">{fmtDate(pair.leg2.date)}</span>
                     <div className="lb-leg-teams">
                       <div className="lb-leg-row">
-                        <img src={pair.leg2.homeLogo} alt="" className="lb-leg-logo" />
+                         <img src={pair.leg2.homeLogo} alt="" className="lb-leg-logo" loading="lazy" />
                         <span className="lb-leg-name lb-leg-name-bold">{pair.leg2.home}</span>
                       </div>
                       <div className="lb-leg-score lb-leg-score-bold">
@@ -140,7 +140,7 @@ export function LibertadoresBracket({ data }: { data: LeagueTable }) {
                       </div>
                       <div className="lb-leg-row lb-leg-row-right">
                         <span className="lb-leg-name lb-leg-name-bold">{pair.leg2.away}</span>
-                        <img src={pair.leg2.awayLogo} alt="" className="lb-leg-logo" />
+                         <img src={pair.leg2.awayLogo} alt="" className="lb-leg-logo" loading="lazy" />
                       </div>
                     </div>
                   </div>

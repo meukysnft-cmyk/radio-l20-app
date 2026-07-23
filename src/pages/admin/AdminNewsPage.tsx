@@ -13,28 +13,36 @@ import { ModulePage } from './cms/ModulePage'
 
 type NewsFormState = {
   title: string
+  subtitle: string
   excerpt: string
   category: string
   section: 'general' | 'sports'
   author: string
+  editor: string
   content: string
   imageUrl: string
   programSlug: string
   status: ContentStatus
   featured: boolean
+  tags: string
+  sourceUrl: string
 }
 
 const emptyNewsForm: NewsFormState = {
   title: '',
+  subtitle: '',
   excerpt: '',
   category: 'Cidade',
   section: 'general',
   author: '',
+  editor: '',
   content: '',
   imageUrl: '',
   programSlug: '',
   status: 'draft',
   featured: false,
+  tags: '',
+  sourceUrl: '',
 }
 
 function getErrorMessage(error: unknown) {
@@ -107,15 +115,19 @@ export function AdminNewsPage() {
 
     const payload: Omit<NewsDocument, 'id' | 'createdAt' | 'updatedAt'> = {
       title: form.title.trim(),
+      subtitle: form.subtitle.trim() || undefined,
       excerpt: form.excerpt.trim(),
       category: form.category.trim(),
       section: form.section,
       author: form.author.trim(),
+      editor: form.editor.trim() || undefined,
       content: form.content.trim(),
       imageUrl: form.imageUrl.trim(),
-      programSlug: form.programSlug.trim(),
+      programSlug: form.programSlug.trim() || undefined,
       status: form.status,
       featured: form.featured,
+      tags: form.tags.trim() ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : undefined,
+      sourceUrl: form.sourceUrl.trim() || undefined,
     }
 
     if (!payload.title || !payload.excerpt) {
@@ -147,15 +159,19 @@ export function AdminNewsPage() {
     setErrorMessage('')
     setForm({
       title: item.title || '',
+      subtitle: item.subtitle || '',
       excerpt: item.excerpt || '',
       category: item.category || 'Cidade',
       section: item.section || 'general',
       author: item.author || '',
+      editor: item.editor || '',
       content: item.content || '',
       imageUrl: item.imageUrl || '',
       programSlug: item.programSlug || '',
       status: item.status || 'draft',
       featured: Boolean(item.featured),
+      tags: item.tags?.join(', ') || '',
+      sourceUrl: item.sourceUrl || '',
     })
   }
 
@@ -205,6 +221,15 @@ export function AdminNewsPage() {
           </label>
 
           <label>
+            Subtítulo
+            <input
+              onChange={(event) => updateForm('subtitle', event.target.value)}
+              placeholder="Subtítulo opcional"
+              value={form.subtitle}
+            />
+          </label>
+
+          <label>
             Resumo
             <input
               onChange={(event) => updateForm('excerpt', event.target.value)}
@@ -246,6 +271,14 @@ export function AdminNewsPage() {
 
           <div className="admin-form-grid">
             <label>
+              Editor
+              <input
+                onChange={(event) => updateForm('editor', event.target.value)}
+                placeholder="Nome do editor (opcional)"
+                value={form.editor}
+              />
+            </label>
+            <label>
               Seção
               <select
                 onChange={(event) => updateForm('section', event.target.value as 'general' | 'sports')}
@@ -255,18 +288,19 @@ export function AdminNewsPage() {
                 <option value="sports">Notícia Esportiva</option>
               </select>
             </label>
-            <label>
-              Status
-              <select
-                onChange={(event) => updateForm('status', event.target.value as ContentStatus)}
-                value={form.status}
-              >
-                <option value="draft">Rascunho</option>
-                <option value="published">Publicado</option>
-                <option value="archived">Arquivado</option>
-              </select>
-            </label>
           </div>
+
+          <label>
+            Status
+            <select
+              onChange={(event) => updateForm('status', event.target.value as ContentStatus)}
+              value={form.status}
+            >
+              <option value="draft">Rascunho</option>
+              <option value="published">Publicado</option>
+              <option value="archived">Arquivado</option>
+            </select>
+          </label>
 
           <label>
             Link da imagem
@@ -302,6 +336,27 @@ export function AdminNewsPage() {
               value={form.content}
             />
           </label>
+
+          <div className="admin-form-grid">
+            <label>
+              Tags
+              <input
+                onChange={(event) => updateForm('tags', event.target.value)}
+                placeholder="futebol, pilar, campeonato"
+                value={form.tags}
+              />
+              <small style={{ opacity: 0.6 }}>Separadas por vírgula</small>
+            </label>
+            <label>
+              Origem da informação
+              <input
+                inputMode="url"
+                onChange={(event) => updateForm('sourceUrl', event.target.value)}
+                placeholder="https://ge.globo.com/..."
+                value={form.sourceUrl}
+              />
+            </label>
+          </div>
 
           <label className="admin-checkbox">
             <input
@@ -350,9 +405,13 @@ export function AdminNewsPage() {
               <div>
                 <span>{item.category || 'Sem categoria'}</span>
                 <h3>{item.title}</h3>
+                {item.subtitle ? <p style={{ opacity: 0.7, fontSize: '0.9rem' }}>{item.subtitle}</p> : null}
                 <p>{item.excerpt}</p>
                 {item.author ? <small>Autor: {item.author}</small> : null}
+                {item.editor ? <small>Editor: {item.editor}</small> : null}
                 {item.programSlug ? <small>Programa: {radioPrograms.find((program) => program.slug === item.programSlug)?.name || item.programSlug}</small> : null}
+                {item.tags?.length ? <small>Tags: {item.tags.join(', ')}</small> : null}
+                {item.sourceUrl ? <small>Fonte: <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">{item.sourceUrl}</a></small> : null}
               </div>
               <dl>
                 <div>

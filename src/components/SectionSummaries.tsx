@@ -82,7 +82,7 @@ export function HoroscopeSummary({ premium = false }: { premium?: boolean }) {
     return (
       <Link className={`holo-premium holo-premium-${signSlug}`} to={radioRoutes.horoscope}>
         <div className="holo-premium-illustration">
-          {svg ? <img src={svg} alt="" width={180} height={180} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
+          {svg ? <img src={svg} alt="" width={180} height={180} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null}
         </div>
         <div className="holo-premium-info">
           <span className="holo-premium-element">{ELEMENT_EMOJI[sign.element]} {ELEMENT_LABELS[sign.element]}</span>
@@ -105,7 +105,7 @@ export function HoroscopeSummary({ premium = false }: { premium?: boolean }) {
       </div>
       <div className="holo-content">
         <div className="holo-symbol-wrap">
-          {svg ? <img src={svg} alt="" width={100} height={100} style={{ width: 100, height: 100, objectFit: 'contain' }} /> : null}
+          {svg ? <img src={svg} alt="" width={100} height={100} loading="lazy" style={{ width: 100, height: 100, objectFit: 'contain' }} /> : null}
         </div>
         <p className="holo-element">{ELEMENT_EMOJI[sign.element]} {ELEMENT_LABELS[sign.element]}</p>
         <h3 className="holo-name">{sign.name}</h3>

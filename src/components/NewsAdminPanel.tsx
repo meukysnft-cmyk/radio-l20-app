@@ -12,28 +12,36 @@ import '../styles/admin.css'
 
 export type NewsFormState = {
   title: string
+  subtitle: string
   excerpt: string
   category: string
   section: 'general' | 'sports'
   author: string
+  editor: string
   content: string
   imageUrl: string
   programSlug: string
   status: ContentStatus
   featured: boolean
+  tags: string
+  sourceUrl: string
 }
 
 export const emptyNewsForm: NewsFormState = {
   title: '',
+  subtitle: '',
   excerpt: '',
   category: 'Cidade',
   section: 'general',
   author: '',
+  editor: '',
   content: '',
   imageUrl: '',
   programSlug: '',
   status: 'draft',
   featured: false,
+  tags: '',
+  sourceUrl: '',
 }
 
 type NewsAdminPanelProps = {
@@ -55,15 +63,19 @@ export function NewsAdminPanel({
     editingItem
       ? {
           title: editingItem.title || '',
+          subtitle: editingItem.subtitle || '',
           excerpt: editingItem.excerpt || '',
           category: editingItem.category || 'Cidade',
           section: editingItem.section || 'general',
           author: editingItem.author || '',
+          editor: editingItem.editor || '',
           content: editingItem.content || '',
           imageUrl: editingItem.imageUrl || '',
           programSlug: editingItem.programSlug || '',
           status: editingItem.status || 'draft',
           featured: Boolean(editingItem.featured),
+          tags: editingItem.tags?.join(', ') || '',
+          sourceUrl: editingItem.sourceUrl || '',
         }
       : emptyNewsForm,
   )
@@ -88,15 +100,19 @@ export function NewsAdminPanel({
 
     const payload: Omit<NewsDocument, 'id' | 'createdAt' | 'updatedAt'> = {
       title: form.title.trim(),
+      subtitle: form.subtitle.trim() || undefined,
       excerpt: form.excerpt.trim(),
       category: form.category.trim(),
       section: form.section,
       author: form.author.trim(),
+      editor: form.editor.trim() || undefined,
       content: form.content.trim(),
       imageUrl: form.imageUrl.trim(),
-      programSlug: form.programSlug.trim(),
+      programSlug: form.programSlug.trim() || undefined,
       status: form.status,
       featured: form.featured,
+      tags: form.tags.trim() ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : undefined,
+      sourceUrl: form.sourceUrl.trim() || undefined,
     }
 
     if (!payload.title || !payload.excerpt) {
@@ -136,10 +152,15 @@ export function NewsAdminPanel({
             <input value={form.title} onChange={(e) => updateForm('title', e.target.value)} required />
           </label>
           <label>
-            Resumo
-            <input value={form.excerpt} onChange={(e) => updateForm('excerpt', e.target.value)} required />
+            Subtítulo
+            <input value={form.subtitle} onChange={(e) => updateForm('subtitle', e.target.value)} placeholder="Opcional" />
           </label>
         </div>
+
+        <label>
+          Resumo
+          <input value={form.excerpt} onChange={(e) => updateForm('excerpt', e.target.value)} required />
+        </label>
 
         <div className="admin-form-grid">
           <label>
@@ -153,6 +174,10 @@ export function NewsAdminPanel({
         </div>
 
         <div className="admin-form-grid">
+          <label>
+            Editor
+            <input value={form.editor} onChange={(e) => updateForm('editor', e.target.value)} placeholder="Opcional" />
+          </label>
           <label>
             Programa
             <select value={form.programSlug} onChange={(e) => updateForm('programSlug', e.target.value)}>
@@ -196,6 +221,18 @@ export function NewsAdminPanel({
           Conteúdo
           <textarea value={form.content} onChange={(e) => updateForm('content', e.target.value)} rows={4} />
         </label>
+
+        <div className="admin-form-grid">
+          <label>
+            Tags
+            <input value={form.tags} onChange={(e) => updateForm('tags', e.target.value)} placeholder="futebol, pilar, campeonato" />
+            <small style={{ opacity: 0.6 }}>Separadas por vírgula</small>
+          </label>
+          <label>
+            Origem da informação
+            <input value={form.sourceUrl} onChange={(e) => updateForm('sourceUrl', e.target.value)} placeholder="https://..." />
+          </label>
+        </div>
 
         <label className="admin-checkbox">
           <input checked={form.featured} onChange={(e) => updateForm('featured', e.target.checked)} type="checkbox" />
