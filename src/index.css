@@ -27,14 +27,10 @@ h1, h2, h3, p { margin-top: 0; }
 p { margin-bottom: 0; }
 img { max-width: 100%; }
 #root { min-height: 100svh; }
-::selection { background: var(--accent); color: var(--ink); }
+::selection { background: var(--brand); color: #fff; }
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
-[data-theme="light"] body {
-  background: var(--bg);
-}
-
-[data-theme="light"] ::selection {
-  background: var(--brand);
-  color: #fff;
+[data-theme="dark"] ::selection {
+  background: var(--accent);
+  color: var(--ink);
 }

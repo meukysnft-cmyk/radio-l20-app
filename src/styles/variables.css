@@ -1,4 +1,51 @@
 :root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-elevated: #f7f8fa;
+  --bg-soft: #f1f3f5;
+  --surface: #ffffff;
+  --surface-deep: #f5f6f8;
+  --surface-overlay: rgba(255, 255, 255, 0.97);
+  --brand-tint: rgba(37, 99, 235, 0.06);
+  --accent-tint: rgba(202, 138, 4, 0.06);
+  --line: rgba(0, 0, 0, 0.07);
+  --line-strong: rgba(0, 0, 0, 0.12);
+  --text: #333333;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+  --text-strong: #111111;
+  --text-on-accent: #ffffff;
+  --brand: #2563eb;
+  --brand-bright: #1d4ed8;
+  --accent: #ca8a04;
+  --ink: #ffffff;
+  --error: #dc2626;
+  --success: #16a34a;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-blue: none;
+  --card: #ffffff;
+  --accent-strong: rgba(202, 138, 4, 0.9);
+  --text-main: #333333;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-pill: 100px;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Section accent colors (UOL-style) */
+  --section-politics: #c0392b;
+  --section-economy: #2980b9;
+  --section-culture: #8e44ad;
+  --section-sports: #27ae60;
+  --section-health: #27ae60;
+  --section-education: #f39c12;
+  --section-cotidiano: #e74c3c;
+  --section-default: #2563eb;
+}
+
+[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0a0a0f;
   --bg-elevated: #141420;
@@ -9,13 +56,14 @@
   --brand-tint: rgba(0, 87, 217, 0.08);
   --accent-tint: rgba(255, 212, 0, 0.06);
   --line: rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(255, 255, 255, 0.12);
   --text: #e2e8f0;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --text-strong: #ffffff;
   --text-on-accent: #ffffff;
-  --brand: #2563eb;
-  --brand-bright: #3b82f6;
+  --brand: #3b82f6;
+  --brand-bright: #60a5fa;
   --accent: #facc15;
   --ink: #0a0a0f;
   --error: #fca5a5;
@@ -25,49 +73,6 @@
   --card: rgba(20, 20, 35, 0.9);
   --accent-strong: rgba(250, 204, 21, 0.9);
   --text-main: #e2e8f0;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-pill: 100px;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Inter', system-ui, sans-serif;
-}
-
-[data-theme="light"] {
-  color-scheme: light;
-  --bg: #f8fafc;
-  --bg-elevated: #ffffff;
-  --bg-soft: rgba(241, 245, 249, 0.9);
-  --surface: rgba(255, 255, 255, 0.95);
-  --surface-deep: rgba(241, 245, 249, 0.98);
-  --surface-overlay: rgba(255, 255, 255, 1);
-  --brand-tint: rgba(37, 99, 235, 0.05);
-  --accent-tint: rgba(250, 204, 21, 0.05);
-  --line: rgba(0, 0, 0, 0.06);
-  --text: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --text-strong: #0f172a;
-  --text-on-accent: #ffffff;
-  --brand: #2563eb;
-  --brand-bright: #3b82f6;
-  --accent: #ca8a04;
-  --ink: #ffffff;
-  --error: #dc2626;
-  --success: #16a34a;
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-blue: 0 1px 3px rgba(37, 99, 235, 0.04);
-  --card: rgba(255, 255, 255, 0.95);
-  --accent-strong: rgba(202, 138, 4, 0.9);
-  --text-main: #1e293b;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-pill: 100px;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-heading: 'Inter', system-ui, sans-serif;
 }
 
 html {
@@ -77,8 +82,12 @@ html {
 body {
   background: transparent;
   color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Section header color overrides per theme */
 [data-theme="light"] .section-header h2 { color: var(--text-strong); }
 [data-theme="light"] .hero-section h1,
 [data-theme="light"] .page-hero h1,
@@ -104,13 +113,13 @@ body {
 [data-theme="light"] .pwa-install-icon { color: var(--text-strong); }
 [data-theme="light"] .news-program-tag { color: var(--brand); }
 
-[data-theme="light"] .news-related-block { background: var(--bg-soft); }
-[data-theme="light"] .program-logo-frame { background: var(--bg-soft); }
-[data-theme="light"] .sponsor-inline-media { background: var(--bg-soft); }
-[data-theme="light"] .sponsor-banner-preview { background: var(--bg-soft); }
+[data-theme="light"] .news-related-block { background: var(--bg-elevated); }
+[data-theme="light"] .program-logo-frame { background: var(--bg-elevated); }
+[data-theme="light"] .sponsor-inline-media { background: var(--bg-elevated); }
+[data-theme="light"] .sponsor-banner-preview { background: var(--bg-elevated); }
 [data-theme="light"] .home-page .sport-intro,
 [data-theme="light"] .home-page .section-title-row { background: transparent; }
-[data-theme="light"] .desktop-nav { background: var(--bg-soft); }
+[data-theme="light"] .desktop-nav { background: var(--bg-elevated); }
 [data-theme="light"] .home-page .hero-section,
 [data-theme="light"] .home-page .hero-split { background: transparent; }
 

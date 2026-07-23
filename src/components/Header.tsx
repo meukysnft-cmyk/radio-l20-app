@@ -8,7 +8,7 @@ import { hasCommunityAccess } from '../routes/RequireCommunityAccess'
 import { Logo } from './Logo'
 import { NotificationToggle } from './NotificationToggle'
 import { PwaInstallButton } from './PwaInstallButton'
-import { WeatherWidget } from './WeatherWidget'
+
 
 type HeaderProps = {
   onMenuClick: () => void
@@ -60,7 +60,8 @@ export function Header({ onMenuClick, isMenuOpen }: HeaderProps) {
       </nav>
 
       <div className="header-actions">
-        <WeatherWidget />
+        <NotificationToggle />
+        <PwaInstallButton />
         <button
           aria-label={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
           className="theme-toggle-button"
@@ -69,8 +70,6 @@ export function Header({ onMenuClick, isMenuOpen }: HeaderProps) {
         >
           <span aria-hidden="true">{theme === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19'}</span>
         </button>
-        <NotificationToggle />
-        <PwaInstallButton />
         <button
           aria-label={isPlaying ? 'Pausar Rádio L20 ao vivo' : 'Tocar Rádio L20 ao vivo'}
           aria-pressed={isPlaying}

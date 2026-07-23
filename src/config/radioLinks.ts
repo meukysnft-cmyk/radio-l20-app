@@ -51,20 +51,12 @@ export const radioRoutes = {
 
 export const radioDesktopNavItems = [
   { label: 'Início', to: radioRoutes.home },
-  { label: 'Ao Vivo', to: radioRoutes.live },
   { label: 'Notícias', to: radioRoutes.news },
-  { label: 'Esporte', to: radioRoutes.sport },
-  { label: 'Agenda', to: radioRoutes.schedule },
+  { label: 'Esportes', to: radioRoutes.sport },
+  { label: 'Ao Vivo', to: radioRoutes.live },
   { label: 'Programas', to: radioRoutes.programs },
+  { label: 'Agenda', to: radioRoutes.schedule },
   { label: 'Vídeos', to: radioRoutes.videos },
-  { label: 'Horóscopo', to: radioRoutes.horoscope },
-  { label: 'Empregos', to: radioRoutes.jobs },
-  { label: 'Anuncie', to: radioRoutes.advertise },
-  { label: 'Patrocinadores', to: radioRoutes.sponsors },
-  { label: 'Contato', to: radioRoutes.contact },
-  { label: 'Chat', to: radioRoutes.chat },
-  { label: 'Cadastro', to: radioRoutes.register },
-  { label: 'Admin', to: radioRoutes.admin },
 ] as const
 
 export const radioNavItems = radioDesktopNavItems
