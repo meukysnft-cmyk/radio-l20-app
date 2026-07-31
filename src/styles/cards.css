@@ -200,6 +200,28 @@
   line-height: 1.7;
   font-size: .92rem;
 }
+
+/* ===== Article typography (reader + editor preview) ===== */
+.news-detail-text h2,
+.rich-editor-area h2 { margin: 1.35em 0 .45em; color: var(--text-strong); font-size: 1.28rem; line-height: 1.3; }
+.news-detail-text h3,
+.rich-editor-area h3 { margin: 1.25em 0 .4em; color: var(--text-strong); font-size: 1.08rem; }
+.news-detail-text p,
+.rich-editor-area p { margin: 0 0 1em; }
+.news-detail-text ul,
+.news-detail-text ol,
+.rich-editor-area ul,
+.rich-editor-area ol { margin: 0 0 1em; padding-left: 1.35em; }
+.news-detail-text li,
+.rich-editor-area li { margin: 0 0 .3em; }
+.news-detail-text blockquote,
+.rich-editor-area blockquote { margin: 1em 0; padding: 10px 14px; border-left: 3px solid var(--brand); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: var(--bg-elevated); color: var(--text-secondary); font-style: italic; }
+.news-detail-text img,
+.rich-editor-area img { max-width: 100%; height: auto; margin: 6px 0; border-radius: var(--radius-sm); }
+.news-detail-text a,
+.rich-editor-area a { color: var(--brand); text-decoration: underline; }
+.news-detail-text strong,
+.rich-editor-area strong { font-weight: 700; }
 .news-related-block {
   display: grid;
   gap: 8px;
