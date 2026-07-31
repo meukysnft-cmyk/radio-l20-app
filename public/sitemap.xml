@@ -1,67 +1,67 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://radiol20.com.br/</loc>
+    <loc>https://canal-l20.web.app/</loc>
     <changefreq>always</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/ao-vivo</loc>
+    <loc>https://canal-l20.web.app/ao-vivo</loc>
     <changefreq>always</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/noticias</loc>
+    <loc>https://canal-l20.web.app/noticias</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/esporte</loc>
+    <loc>https://canal-l20.web.app/esporte</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/agenda</loc>
+    <loc>https://canal-l20.web.app/agenda</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/programas</loc>
+    <loc>https://canal-l20.web.app/programas</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/videos</loc>
+    <loc>https://canal-l20.web.app/videos</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/horoscopo</loc>
+    <loc>https://canal-l20.web.app/horoscopo</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/palavra-de-vida</loc>
+    <loc>https://canal-l20.web.app/palavra-de-vida</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/empregos</loc>
+    <loc>https://canal-l20.web.app/empregos</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/anuncie</loc>
+    <loc>https://canal-l20.web.app/anuncie</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/patrocinadores</loc>
+    <loc>https://canal-l20.web.app/patrocinadores</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://radiol20.com.br/contato</loc>
+    <loc>https://canal-l20.web.app/contato</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

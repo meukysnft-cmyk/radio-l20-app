@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { ZODIAC_SIGNS, getSignSvg, ELEMENT_EMOJI } from '../utils/zodiac'
 import { getSignBySlug, SIGN_PROFILES } from '../data/signProfiles'
 import { radioRoutes } from '../config/radioLinks'
+import { usePageMeta } from '../hooks/usePageMeta'
 
 export function SignDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -19,6 +20,11 @@ export function SignDetailPage() {
   const signMeta = useMemo(
     () => ZODIAC_SIGNS.find((s) => s.name === profile?.name) ?? null,
     [profile],
+  )
+
+  usePageMeta(
+    profile ? `Horóscopo ${profile.name} | Rádio L20` : 'Horóscopo | Rádio L20',
+    profile?.summary || profile?.personality || 'Confira a leitura do seu signo na Rádio L20.',
   )
 
   if (!profile || !signMeta) {

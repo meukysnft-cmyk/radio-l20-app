@@ -4,6 +4,7 @@ import { getSportBySlug, SPORTS } from '../data/sportsData'
 import { radioRoutes } from '../config/radioLinks'
 import { subscribeDocuments } from '../services/firestoreService'
 import { FootballTables } from '../components/FootballTables'
+import { usePageMeta } from '../hooks/usePageMeta'
 import type { NewsDocument } from '../types/content'
 
 type FutebolTab = 'nacional' | 'internacional'
@@ -32,6 +33,11 @@ export function SportDetailPage() {
     })
     return () => unsub()
   }, [sport])
+
+  usePageMeta(
+    sport ? `${sport.name} | Rádio L20` : 'Esportes | Rádio L20',
+    sport ? `Acompanhe a cobertura de ${sport.name} na Rádio L20, com notícias e transmissões.` : 'Acompanhe a cobertura esportiva da Rádio L20.',
+  )
 
   if (!sport) {
     return (

@@ -16,8 +16,7 @@ const STYLE_TAG_ID = 'theme-style-overrides'
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(THEME_KEY)
   if (stored === 'light' || stored === 'dark') return stored
-  if (window.matchMedia?.('(prefers-color-scheme: light)').matches) return 'light'
-  return 'dark'
+  return 'light'
 }
 
 function getInitialStyle(): string {
@@ -77,18 +76,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (css) injectStyleTag(css)
 
     applyAccent(accentId, theme)
-  }, [theme, themeStyleId, accentId])
 
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: light)')
-    const handler = (e: MediaQueryListEvent) => {
-      if (!localStorage.getItem(THEME_KEY)) {
-        setTheme(e.matches ? 'light' : 'dark')
-      }
+    const themeColorTag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    if (themeColorTag) {
+      themeColorTag.setAttribute('content', theme === 'dark' ? '#0a0a0f' : '#ffffff')
     }
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
+  }, [theme, themeStyleId, accentId])
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))

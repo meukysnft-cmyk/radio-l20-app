@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { subscribeDocuments } from '../services/firestoreService'
 import { radioRoutes } from '../config/radioLinks'
 import { getProgramBySlug } from '../data/programsContent'
+import { usePageMeta } from '../hooks/usePageMeta'
 import type { LiveStreamDocument, NewsDocument } from '../types/content'
 
 function getYouTubeEmbedUrl(url: string) {
@@ -79,6 +80,11 @@ export function ProgramDetailPage() {
 
   const hasLiveStream = !!activeLiveStream
   const hasScheduled = scheduledStreams.length > 0
+
+  usePageMeta(
+    program ? `${program.name} | Rádio L20` : 'Programa | Rádio L20',
+    program?.description || program?.slogan || 'Conheça este programa da Rádio L20.',
+  )
 
   if (!program) {
     return <Navigate to={radioRoutes.programs} replace />
